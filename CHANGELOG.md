@@ -12,6 +12,34 @@ version (`MAJOR.MINOR.PATCH`): **PATCH** for a fix or clarification, **MINOR** f
 skill/tool/guide section, **MAJOR** only if an update would break an existing setup (force
 a re-copy to keep working).
 
+## v2026.07 · v1.1.0 — 2026-07-30 (update)
+
+### Added
+- **The Claude twin: claude-for-researchers.** A new appendix section introducing the
+  sister repo this toolkit was ported from —
+  [claude-for-researchers](https://github.com/Mexregkan/claude-for-researchers), the
+  battle-tested Claude Code original — with a side-by-side table of exactly which files
+  differ between the twins and how (AGENTS.md ↔ CLAUDE.md, config.toml sandbox/approvals
+  ↔ settings.json permission lists, `$skill` ↔ `/skill`, hooks.json + `/hooks` trust ↔
+  settings.json hooks, and so on). Everything agent-agnostic is byte-identical between
+  the twins and kept in sync. The same section, mirrored, now also lives in that repo.
+- **Using both: Claude and Codex on one project.** A second new appendix section for
+  researchers who want *both* agents on the same project: one setup without drift (a
+  single `AGENTS.md` as source of truth with `CLAUDE.md` reduced to an `@AGENTS.md`
+  import; one canonical skills folder, symlinked; the same hook scripts registered in
+  both `.codex/hooks.json` and `.claude/settings.json`; the one-writer-at-a-time rule
+  with git as the handover). It then documents **the bridge**: each agent can consult
+  the other as a subprocess — `claude -p "…"` from a Codex session,
+  `codex exec --sandbox read-only "…"` from a Claude session — turning cross-model
+  validation into one shell command. Three worked patterns (second opinion, cross-review
+  of a landed diff, a standing second-opinion rule) plus the honest caveats: you are the
+  referee, keep consultations read-only and blind, one round only.
+
+### Action needed
+- **Nothing — guide-only.** No starter file changed.
+
+---
+
 ## v2026.07 · v1.0.0 — 2026-07-30 (initial release)
 
 ### Added
