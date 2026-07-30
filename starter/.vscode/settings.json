@@ -1,0 +1,27 @@
+{
+    // Word wrap for notebook CELLS only (Wolfbook .wb, Jupyter, any notebook) — and NOT
+    // for your .tex/.py/.md or other regular files.
+    //
+    // `notebook.editorOptionsCustomizations` applies editor options to notebook *cell*
+    // editors only. This is the right key:
+    //   - the plain unscoped "editor.wordWrap": "on" would wrap EVERY file you open;
+    //   - the language-scoped "[wolfram]": { "editor.wordWrap": "on" } does NOT reach
+    //     notebook cells at all (a VS Code limitation).
+    // See docs/wolfbook-notebook-ux.md for the full story.
+    //
+    // This is project-scoped, so it only affects notebooks opened in THIS project. Reload the
+    // VS Code window after first checkout: Cmd/Ctrl+Shift+P -> "Developer: Reload Window".
+    "notebook.editorOptionsCustomizations": {
+        "editor.wordWrap": "on"
+    },
+    "notebook.output.wordWrap": true,
+
+    // Render Wolfram OUTPUT as wrapping plain text instead of a fixed-width image, so you
+    // never have to scroll sideways to read a long result. The default "Image" is a single
+    // SVG/PNG that can ONLY scroll horizontally — `notebook.output.wordWrap` above cannot
+    // wrap an image. "InputForm" is plain text (wraps to the notebook width and follows one
+    // colour on any theme), which reads best for long symbolic expressions. Other choices:
+    // "HTML" (wraps, but uses Wolfram-Cloud styling that can clash with non-dark themes),
+    // "MathML", or "Image". This is a Wolfbook-only key; other notebooks ignore it.
+    "wolfbook.notebook.rendering.outputFormat": "InputForm"
+}

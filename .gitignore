@@ -1,0 +1,8 @@
+/.claude/
+*.DS_Store
+__pycache__/
+*.pyc
+
+# Private project instructions — local only, never ship
+CLAUDE.md
+AGENTS.local.md

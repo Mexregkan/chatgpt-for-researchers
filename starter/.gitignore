@@ -1,0 +1,46 @@
+# .gitignore for a research project — copy to your project root and adapt.
+
+# --- Shared Overleaf clone: never push the group's paper to your personal repo ---
+# Overleaf/ is a live git clone of the shared Overleaf project (its own remote).
+# archive/ holds retired copies. See the overleaf-sync skill.
+/Overleaf/
+/archive/
+
+# --- LaTeX build artifacts ---
+.texbuild/
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# --- Python / numerics ---
+numerics/venv/
+__pycache__/
+*.pyc
+numerics/run.log
+# AI-generated, provisional outputs (review before committing if you want them tracked)
+numerics/generated/
+figures/generated/
+
+# --- Wolfram / Mathematica scratch ---
+.cache_*.mx
+numerics/img/
+
+# --- macOS / editor ---
+.DS_Store
+# Ignore personal VS Code state, but DO track the shared word-wrap settings that ship
+# with this toolkit (notebook cells; see docs/wolfbook-notebook-ux.md).
+.vscode/*
+!.vscode/settings.json
+
+# --- Codex: personal state (keep the SHARED .codex/ and AGENTS.md tracked) ---
+# The shared project config (.codex/config.toml, .codex/hooks.json, .codex/hooks/,
+# .codex/agents/), the skills (.agents/skills/), and AGENTS.md stay tracked — they
+# should be identical for every collaborator. These are personal, never commit them:
+AGENTS.override.md
+.codex/snapshots/

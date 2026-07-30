@@ -1,0 +1,156 @@
+% brief.tex — short self-contained reference (target: 15–30 pages)
+%
+% USAGE BY CLAUDE:
+%   - READ THIS FIRST at the start of every new session.
+%   - This file contains the current state of the project: established results,
+%     key formulas, open problems, conventions. No proofs, no derivations.
+%   - Cross-references to workbook.tex are provided so you can navigate there when
+%     you need the derivation.
+%   - Update this file whenever workbook.tex gets a new result, corrected formula,
+%     or status change. Use /sync-condensed to propagate load-bearing changes.
+%   - Status tags: [ESTABLISHED], [CONJECTURED], [OPEN]
+%
+\documentclass[11pt, a4paper]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{mdframed}           % shaded boxes for highlighted results
+
+% Status colours
+\newcommand{\established}{\textcolor{teal}{\textbf{[ESTABLISHED]}}}
+\newcommand{\conjectured}{\textcolor{orange}{\textbf{[CONJECTURED]}}}
+\newcommand{\open}{\textcolor{red}{\textbf{[OPEN]}}}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+% -----------------------------------------------------------------------
+% CUSTOM COMMANDS — keep in sync with workbook.tex and CLAUDE.md
+% -----------------------------------------------------------------------
+% \newcommand{\examplecommand}[1]{\mathcal{#1}}
+
+% -----------------------------------------------------------------------
+\title{[Project Title] — Condensed Reference\\
+{\normalsize\textit{Current state of knowledge — updated \today}}}
+\author{[Author Name]}
+\date{}
+% -----------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+% -----------------------------------------------------------------------
+\section{Main results}
+\label{sec:mainresults}
+% -----------------------------------------------------------------------
+
+% Two or three key theorems stated precisely.
+% Someone reading only this section should know what the project has established.
+
+\begin{theorem}[\established, see workbook.tex \S\ref{...}]
+[Statement of main result.]
+\end{theorem}
+
+% -----------------------------------------------------------------------
+\section{Conventions and definitions}
+\label{sec:conventions}
+% -----------------------------------------------------------------------
+
+% Every symbol defined, with the exact normalisation used.
+% This section prevents Codex from guessing. Be explicit about signs,
+% normalisations, and branch choices.
+
+\begin{definition}
+[Define your key objects here.]
+\end{definition}
+
+\begin{remark}
+[Normalisation convention: state explicitly which convention you use when
+there are multiple in the literature.]
+\end{remark}
+
+% -----------------------------------------------------------------------
+\section{[First topic] — results}
+\label{sec:topic1results}
+% -----------------------------------------------------------------------
+
+% One section per topic. Theorem statement only, no proof.
+% Cross-reference workbook.tex for the derivation.
+% Tag each result: [ESTABLISHED], [CONJECTURED], or [OPEN].
+
+\begin{proposition}[\established, workbook.tex \S\ref{...}]
+[Statement.]
+\end{proposition}
+
+\begin{conjecture}[\conjectured]
+[Statement.]
+\end{conjecture}
+
+% -----------------------------------------------------------------------
+\section{[Second topic] — results}
+\label{sec:topic2results}
+% -----------------------------------------------------------------------
+
+[Content following same pattern.]
+
+% -----------------------------------------------------------------------
+\section{Numerical results}
+\label{sec:numericresults}
+% -----------------------------------------------------------------------
+
+% Exact computed values, method, precision, what was validated.
+% For each result: value, method, precision level, validation performed.
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Quantity & Value & Method & Validated \\
+\midrule
+[quantity] & [value] & [method] & [how validated] \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Open problems}
+\label{sec:open}
+% -----------------------------------------------------------------------
+
+% Ranked list. Item 1 is the next thing to do.
+
+\begin{enumerate}[label=\textbf{O\arabic*.}]
+  \item \open\ [Most urgent open problem — this is the next step.]
+  \item \open\ [Second priority.]
+  \item \open\ [Third priority.]
+\end{enumerate}
+
+% -----------------------------------------------------------------------
+\section{Recent corrections}
+\label{sec:corrections}
+% -----------------------------------------------------------------------
+
+% Any result that was wrong and has been corrected.
+% State the corrected version; note what the previous version was.
+
+% [No corrections yet.]
+
+% -----------------------------------------------------------------------
+\end{document}

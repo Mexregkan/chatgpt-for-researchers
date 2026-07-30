@@ -1,0 +1,40 @@
+# Project-scoped Codex config for a research project — .codex/config.toml
+#
+# Codex layers this over your personal ~/.codex/config.toml for THIS project only
+# (project config applies once you have trusted the project; provider/auth/notify
+# keys are ignored at project scope). Precedence: CLI flags > this file > your
+# ~/.codex/config.toml > defaults.
+#
+# The philosophy, matching the guide: let routine work run without interruption,
+# keep a real safety net. "workspace-write" + "on-request" means Codex can edit
+# files and run commands inside the project sandbox freely, and asks you before
+# anything that needs to escalate out of it (network installs, writes outside the
+# workspace, etc.). Nothing is hard-blocked; you approve or refuse in the moment.
+
+# --- Permissions -------------------------------------------------------------
+# Equivalent of the "Ask for approval" permission mode, stated explicitly.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+# Research sessions constantly fetch packages, arXiv pages, and data — allow
+# network inside the sandbox. Set to false for a stricter setup: Codex will then
+# ask before anything that needs the network.
+network_access = true
+
+# --- Web search --------------------------------------------------------------
+# Default is "cached" (an OpenAI-maintained index; the safer choice). Uncomment
+# for live search by default, or start a session with `codex --search`:
+# web_search = "live"
+
+# --- MCP servers (optional) --------------------------------------------------
+# Register project tools here — the config is shared by the CLI, the IDE
+# extension, and the ChatGPT desktop app. Example (STDIO server):
+#
+# [mcp_servers.my-server]
+# command = "npx"
+# args = ["-y", "my-mcp-server"]
+#
+# Wolfbook users: enable the extension's MCP ("wolfbook.mcpEnabled": true in VS
+# Code) and register its server per Wolfbook's docs, then run /mcp in Codex to
+# confirm the tools are visible. The $wolfbook skill is the playbook for them.

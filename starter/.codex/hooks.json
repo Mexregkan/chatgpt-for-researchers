@@ -1,0 +1,28 @@
+{
+  "description": "Research-project lifecycle hooks (chatgpt-for-researchers starter). Two hooks ship ON: pre-compact (stamps AGENTS.md + snapshots the task log before context compaction) and promise-checker (catches 'I've saved that' said without an actual file edit). Three more ship OFF because they need per-project configuration — enable by adding the block documented at the top of each script to a 'PostToolUse' array here: .codex/hooks/git-mirror.sh (dual-remote push mirror), .codex/hooks/pipeline-guard.sh (Pipeline workflow nudge; self-quiets until a Pipeline/ doc exists), .agents/skills/wolfram-headless/hooks/wolfram-license-notice.sh (flags the misleading wolframscript 'license error'). Codex requires every non-managed hook to be reviewed and trusted before it runs: type /hooks, inspect each script, trust it. Re-trust after editing a script.",
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/pre-compact.sh",
+            "timeout": 10,
+            "statusMessage": "Saving state before compaction"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/promise-checker.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

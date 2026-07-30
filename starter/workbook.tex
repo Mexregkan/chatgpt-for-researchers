@@ -1,0 +1,124 @@
+% workbook.tex — full working record (research journal in LaTeX)
+%
+% USAGE BY CLAUDE:
+%   - This is the COMPLETE working record: proofs, derivations, failed attempts,
+%     discussions, corrections, and thinking in progress. Not a paper draft.
+%   - Show every step of every derivation. Never summarise with "one finds" or
+%     "a short computation gives."
+%   - Use \label on every section, subsection, theorem, equation, and figure.
+%   - Corrections: REPLACE wrong content in place — never append a correction block.
+%   - Grep and targeted reads only; do not read this file top-to-bottom each session.
+%
+\documentclass[11pt, a4paper]{article}
+
+% --- Core math packages ---
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}          % \coloneqq, \DeclarePairedDelimiter, etc.
+\usepackage{bm}                 % \bm for bold math symbols
+
+% --- Layout ---
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{microtype}
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Fonts and encoding ---
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% --- References and links ---
+\usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+\usepackage[numbers, sort&compress]{natbib}
+
+% --- Miscellaneous ---
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{booktabs}           % professional tables
+
+% -----------------------------------------------------------------------
+% THEOREM ENVIRONMENTS
+% -----------------------------------------------------------------------
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+
+% -----------------------------------------------------------------------
+% CUSTOM COMMANDS
+% (add your notation here; keep in sync with brief.tex and CLAUDE.md)
+% -----------------------------------------------------------------------
+% \newcommand{\examplecommand}[1]{\mathcal{#1}}
+
+% -----------------------------------------------------------------------
+\title{[Project Title]}
+\author{[Author Name]}
+\date{\today}
+% -----------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+[Abstract — one paragraph summary of the main results.]
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% -----------------------------------------------------------------------
+\section{Introduction}
+\label{sec:intro}
+% -----------------------------------------------------------------------
+
+[Introduction — background, motivation, statement of main results.]
+
+% -----------------------------------------------------------------------
+\section{Notation and conventions}
+\label{sec:conventions}
+% -----------------------------------------------------------------------
+
+[Define every symbol used in the paper. This section is the reference for
+Codex. Be explicit about normalisations, sign conventions, and branch choices.]
+
+% -----------------------------------------------------------------------
+\section{[First main topic]}
+\label{sec:topic1}
+% -----------------------------------------------------------------------
+
+[Content.]
+
+% -----------------------------------------------------------------------
+\section{[Second main topic]}
+\label{sec:topic2}
+% -----------------------------------------------------------------------
+
+[Content.]
+
+% -----------------------------------------------------------------------
+\section{Numerical results}
+\label{sec:numerics}
+% -----------------------------------------------------------------------
+
+[Numerical computations: method, precision, validation, results.]
+
+% -----------------------------------------------------------------------
+\section{Conclusion}
+\label{sec:conclusion}
+% -----------------------------------------------------------------------
+
+[Summary and outlook.]
+
+% -----------------------------------------------------------------------
+\bibliographystyle{plainnat}
+\bibliography{references}
+% -----------------------------------------------------------------------
+
+\end{document}
