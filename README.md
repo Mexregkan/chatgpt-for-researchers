@@ -21,7 +21,7 @@ workflow so that *you* can do the research faster and more cleanly: less time on
 housekeeping, better continuity across sessions, fewer mistakes from working in a big
 messy codebase. Codex is the tool; you are the researcher.
 
-**Version 2026.07 · v1.1.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
+**Version 2026.07 · v1.1.1** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
 a project from an earlier copy, the changelog tells you what is worth re-copying from
 `starter/`. (The calendar tag says how current your copy is; the SemVer says how much has
 changed and whether anything breaks — see the changelog intro.)
@@ -2635,8 +2635,9 @@ distill selftest                                        # should print: all case
 ```
 
 Then prefix the noisy commands — `distill pdflatex …`, `distill wolframscript -file …`,
-`distill python3 …` — or add a standing rule to your AGENTS.md so Codex does it
-automatically:
+`distill python3 …` — or add a standing rule to your [`~/.codex/AGENTS.md`](#group-projects-shared-vs-personal-configuration)
+(your personal file, which loads in *every* project) so Codex does it automatically
+everywhere — or to a project `AGENTS.md` to scope it to one repo:
 
 ```
 ## Command output filtering

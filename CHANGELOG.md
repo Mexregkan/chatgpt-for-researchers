@@ -12,6 +12,23 @@ version (`MAJOR.MINOR.PATCH`): **PATCH** for a fix or clarification, **MINOR** f
 skill/tool/guide section, **MAJOR** only if an update would break an existing setup (force
 a re-copy to keep working).
 
+## v2026.07 · v1.1.1 — 2026-07-30 (update)
+
+### Clarified
+- **distill: point the standing rule at your global `~/.codex/AGENTS.md`.** The distill
+  section (§18) previously said to add the "always prefix noisy commands with distill"
+  rule to "your AGENTS.md" without saying which one, so a reader would drop it into a
+  single project's file. It now names the personal `~/.codex/AGENTS.md` (which loads in
+  every project) as the place for a machine-wide tool like distill — with a link to the
+  configuration-files section that explains that file — and notes a project `AGENTS.md`
+  as the option for scoping it to one repo. This mirrors the Claude twin's wording, which
+  already pointed at the global `~/.claude/` location.
+
+### Action needed
+- **Nothing — guide-only.** No starter file changed.
+
+---
+
 ## v2026.07 · v1.1.0 — 2026-07-30 (update)
 
 ### Added
