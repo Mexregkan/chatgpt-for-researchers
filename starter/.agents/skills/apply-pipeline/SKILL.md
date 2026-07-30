@@ -33,7 +33,7 @@ itself the thing that's stale.
 
 **1. Read the inputs.** The pipeline doc, the notes section(s) it cites (grep `workbook.tex` for the
 labels — the authority for *why*), and, if you're acting on an audit, that report. Dump the code if
-it's a notebook: `python3 .agents/skills$write-pipeline/dump_code.py "/tmp/pipeline-dumps" "<code>"`.
+it's a notebook: `python3 .agents/skills/write-pipeline/dump_code.py "/tmp/pipeline-dumps" "<code>"`.
 
 **2. Pin the exact change.** State precisely what will change, in which cells/functions, and *why*
 (cite the pipeline line + notes label). Confirm the change preserves the documented behavior (for an

@@ -22,7 +22,7 @@ Read the header, or scan the folder if checking everything.
 
 **2. Dump the code** to readable text (same helper the writer uses):
 ```bash
-python3 .agents/skills$write-pipeline/dump_code.py "/tmp/pipeline-dumps" "path/to/<file>"
+python3 .agents/skills/write-pipeline/dump_code.py "/tmp/pipeline-dumps" "path/to/<file>"
 ```
 
 **3. Extract the doc's checkable claims and verify each against the dump:**

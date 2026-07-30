@@ -22,7 +22,7 @@ real `\[Omega]3` falls through / returns garbage when fed the literal-`ω` symbo
 - The notebook/desktop kernel (Mathematica FE / Wolfbook in VS Code) handles literal Greek fine — this
   is **headless-`.wls`-only**. So copying notebook code into a `.wls` introduces the bug.
 - Quick converter (run before any heavy job): replace the Greek chars with their `\[...]` escapes.
-  A one-liner is in `.agents/skills$wolfram-headless/scripts/greek2esc.py` in this skill's directory.
+  A one-liner is in `.agents/skills/wolfram-headless/scripts/greek2esc.py` in this skill's directory.
 - Audit a file: `LC_ALL=C grep -nP '[^\x00-\x7F]' file.wls` — anything in CODE (not comments) is a hazard.
 
 ## RULE 2 — "license error" is a mis-reported crash; diagnose, don't believe it

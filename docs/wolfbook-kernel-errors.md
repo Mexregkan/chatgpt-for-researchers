@@ -48,8 +48,8 @@ The toolkit ships this so Codex follows it by default:
 - **Sanity-sweep after multi-cell setup:** `Select[{<key symbols>}, ! FreeQ[#, ReplaceAll] &]` must
   be `{}`, and `ValueQ /@ {<data lists>}` all `True`.
 
-This is the [`wolfram-headless`](../starter/.codex/prompts/wolfram-headless.md) prompt's RULE 4
-— install the prompt and Codex applies it whether it runs Wolfram headless or through the MCP.
+This is the [`wolfram-headless`](../starter/.agents/skills/wolfram-headless/SKILL.md) skill's RULE 4
+— install the skill and Codex applies it whether it runs Wolfram headless or through the MCP.
 
 ## Is there a code patch (like the splitter fix)?
 

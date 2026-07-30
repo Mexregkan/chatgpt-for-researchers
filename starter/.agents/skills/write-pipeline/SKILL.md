@@ -23,7 +23,7 @@ notebook or a multi-pass engine does. That growing-too-big moment is the trigger
 
 **1. Make the code readable.** Notebooks are JSON — dump them:
 ```bash
-python3 .agents/skills$write-pipeline/dump_code.py \
+python3 .agents/skills/write-pipeline/dump_code.py \
     "/tmp/pipeline-dumps" "path/to/<target>.wb"   # .wb/.ipynb → outline+full; .m/.wls/.py printed as-is
 ```
 `/tmp/pipeline-dumps` is scratch space (any writable dir works). For a notebook this writes `<base>.outline.txt` (one line per

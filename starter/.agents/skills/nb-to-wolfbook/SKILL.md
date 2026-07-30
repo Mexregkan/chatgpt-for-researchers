@@ -103,7 +103,7 @@ edit via the Wolfbook MCP), THEN run the fix, THEN reopen.
 ## Steps for .nb files (preferred path — needs wolframscript)
 
 ```bash
-python3 .agents/skills$nb-to-wolfbook/nb2wb.py "<file.nb>" ["<out.wb>"]
+python3 .agents/skills/nb-to-wolfbook/nb2wb.py "<file.nb>" ["<out.wb>"]
 ```
 
 This produces a faithful, bridge-safe `.wb`. Report the printed summary line.
@@ -127,7 +127,7 @@ normalizer on the result (see below), or the multi-line bug persists.
 
 ## Making an existing .wb safe (no reconversion)
 ```bash
-python3 .agents/skills$nb-to-wolfbook/wl_normalize.py --wb "numerics/your-notebook.wb"
+python3 .agents/skills/nb-to-wolfbook/wl_normalize.py --wb "numerics/your-notebook.wb"
 ```
 Normalizes every code cell in place (backup `.wb.bak`). Use this when a `.wb` already
 exists but mis-evaluates through the bridge.
@@ -137,7 +137,7 @@ Run the checker (catches the `)`-suffix / implicit-`Times` split that a naive op
 test misses — the MMVbar regression — AND reports any rectangle-rendering PUA chars left in
 code cells):
 ```bash
-python3 .agents/skills$nb-to-wolfbook/wl_normalize.py --check "<file.wb>"
+python3 .agents/skills/nb-to-wolfbook/wl_normalize.py --check "<file.wb>"
 # expect: "OK: no split-statement hazards ..." and "OK: no PUA (rectangle) chars ..."  (exit 0)
 ```
 The driver also prints any hazard inline. Output format:

@@ -30,7 +30,7 @@ Two operations, one helper script (`sync-wb-nb.wls`, in this skill's directory):
 ## regenerate — full colourised rebuild
 
 ```bash
-WLS=".agents/skills$sync-wb-nb$sync-wb-nb.wls"   # path from project root
+WLS=".agents/skills/sync-wb-nb/sync-wb-nb.wls"   # path from project root
 wolframscript -file "$WLS" regenerate "<abs wbPath>" "<abs nbPath>"
 ```
 
@@ -65,7 +65,7 @@ assertions, post-write verification with automatic restore — all in `sync-wb-n
 Bash call per operation:
 
 ```bash
-WLS=".agents/skills$sync-wb-nb$sync-wb-nb.wls"   # path from project root
+WLS=".agents/skills/sync-wb-nb/sync-wb-nb.wls"   # path from project root
 wolframscript -file "$WLS" stability "<snippet>"            # is the .wb cell box-stable?
 wolframscript -file "$WLS" replace   "<wbSnippet>" ["<nbOldSnippet>"]   # sync an edited cell
 wolframscript -file "$WLS" insert    "<wbSnippet>" "<nbAnchorSnippet>"  # sync a new cell
@@ -93,7 +93,7 @@ done (verification is built in). Report the PASS lines.
    reassociates `Times` through `FractionBox` and breaks `===`; atomic-numerator fractions
    are stable. Fix by assigning the numerator to a local (`c2 = a*b; … c2/c`), re-validate
    the maths numerically, then sync. The script refuses to write unstable code.
-3. **Backup before write, restore on failed verification.** Automatic (`/tmp$sync-wb-nb-backup-*.nb`).
+3. **Backup before write, restore on failed verification.** Automatic (`/tmp/sync-wb-nb-backup-*.nb`).
 4. **Unique-target assertion.** Ambiguous or missing snippet matches abort before writing.
 5. **Verify, don't trust**: after writing, the `.nb` cell must parse `===` the `.wb` code.
 

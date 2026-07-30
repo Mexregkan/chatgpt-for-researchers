@@ -94,5 +94,5 @@ claude -p "$(cat /tmp/validation_prompt.txt)"
 ```
 
 This lets you run the second-model check from the same terminal without switching
-context. The cross-validate prompt can write the prompt to `/tmp/validation_prompt.txt`
+context. The cross-validate skill can write the prompt to `/tmp/validation_prompt.txt`
 automatically if you pass `--write-prompt`.
