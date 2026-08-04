@@ -103,6 +103,8 @@ yesno "Do you push to TWO git remotes (e.g. personal GitHub + institution GitLab
                                                             && DUALREMOTE=1 || DUALREMOTE=0
 yesno "Large / multi-branch project? (adds bigPicture.tex overview, strategy-map.md route plan, CHANGELOG.md result log)" n \
                                                             && BIGPROJECT=1 || BIGPROJECT=0
+yesno "Will a SECOND agent (e.g. Claude Code) also work in this repo? (adds handoff/, the agent mailbox)" n \
+                                                            && TWOAGENTS=1 || TWOAGENTS=0
 
 say ""
 say "Core files (universal — every project gets these):"
@@ -193,6 +195,27 @@ if [ "$DUALREMOTE" -eq 1 ]; then
     say "  -> dual remotes: edit scripts/git-push-both.sh (set your remotes + identities),"
     say "     then enable the mirror hook in .codex/hooks.json (the exact block to paste"
     say "     is documented at the top of .codex/hooks/git-mirror.sh)."
+fi
+
+# The agent mailbox. Gated on there actually being a second agent: with one agent
+# there is nobody to hand over to, and an empty inbox is just one more file to
+# explain. (Unlike the Pipeline workflow, this one is not inert when unused — the
+# protocol asks every session to read INBOX.md.)
+if [ "$TWOAGENTS" -eq 1 ]; then
+    mkdir -p handoff/msgs handoff/archive
+    [ -e handoff/msgs/.gitkeep ]    || : > handoff/msgs/.gitkeep
+    [ -e handoff/archive/.gitkeep ] || : > handoff/archive/.gitkeep
+    core starter/handoff/README.md handoff/README.md
+    core starter/handoff/INBOX.md  handoff/INBOX.md
+    core starter/handoff/hx.sh     handoff/hx.sh
+    chmod +x handoff/hx.sh 2>/dev/null
+    say "  -> agent mailbox: AGENTS.md already carries the \"Handover to the other agent\""
+    say "     section — keep it. AGENTS.md is the single source of truth, so pointing"
+    say "     CLAUDE.md at it (a one-line \"@AGENTS.md\" import) briefs both agents at once."
+else
+    say ""
+    say "  note: AGENTS.md carries a \"Handover to the other agent\" section for the"
+    say "        two-agent mailbox. Delete it — you said only one agent works here."
 fi
 
 if [ ! -d .git ]; then

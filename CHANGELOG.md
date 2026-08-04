@@ -12,6 +12,44 @@ version (`MAJOR.MINOR.PATCH`): **PATCH** for a fix or clarification, **MINOR** f
 skill/tool/guide section, **MAJOR** only if an update would break an existing setup (force
 a re-copy to keep working).
 
+## v2026.08 · v1.2.0 — 2026-08-04 (update)
+
+### Added
+- **The agent mailbox (`handoff/`).** A new subsection of *Using both: Claude and Codex
+  on one project* — **The mailbox: how they hand work to each other** — plus a ready-made
+  kit in `starter/handoff/`. The bridge pattern already in the guide is *synchronous*
+  (one agent calls the other and waits); most two-agent work is asynchronous, and left
+  alone it degenerates: handover notes pile up as ad-hoc files, both agents re-read all
+  of them every session, and the obvious way to "reply" is to edit the other's note in
+  place, which the other never notices. The mailbox fixes all three: `INBOX.md` is an
+  index (one row per thread) and is the only file read at session start; `hx.sh` writes
+  the message and the index row so neither agent has to recall the format; threads are
+  archived, not deleted, because settled threads are the only record of *why* a decision
+  was reversed.
+  Three rules, each from a real failure: never edit the other agent's message (reply
+  instead); cap messages at 40 lines (detail belongs in the workbook and changelog); and
+  **state your gates including what they do not cover** — the section documents a case
+  where a 71-value exact check was cited as confirming a result while contributing
+  exactly zero to the quantity in dispute, and a second error of the same shape in the
+  same session. A gate whose scope is unstated is not evidence.
+  `hx.sh` selects threads on the `THREAD:` front-matter field, never on the filename —
+  a filename glob both misses renamed messages (it archives nothing while reporting
+  success) and over-matches any slug that merely *ends* in the same text, so closing
+  `z11` would take a live `delta-z11` thread with it.
+- **`starter/AGENTS.md` carries the wiring.** A new *Handover to the other agent*
+  section makes checking `handoff/INBOX.md` step 1 of resuming a session, with the
+  message rules inline. Since `AGENTS.md` is the single source of truth and `CLAUDE.md`
+  can be a one-line `@AGENTS.md` import, that one section briefs both agents.
+  **Action needed (optional):** delete the section if only one agent works in your repo.
+- **`scripts/bootstrap.sh` now offers the mailbox.** A new question — *"Will a SECOND
+  agent (e.g. Claude Code) also work in this repo?"*, default no — installs
+  `starter/handoff/`. Gated rather than installed by default: unlike the Pipeline
+  workflow, the mailbox is not inert when unused, because the protocol asks every
+  session to read `INBOX.md`.
+
+This section is mirrored in the Claude twin (`claude-for-researchers` v1.10.0); the
+`handoff/` kit itself is agent-agnostic and byte-identical between the two repos.
+
 ## v2026.07 · v1.1.1 — 2026-07-30 (update)
 
 ### Clarified
