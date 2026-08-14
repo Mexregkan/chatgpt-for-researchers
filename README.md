@@ -21,7 +21,7 @@ workflow so that *you* can do the research faster and more cleanly: less time on
 housekeeping, better continuity across sessions, fewer mistakes from working in a big
 messy codebase. Codex is the tool; you are the researcher.
 
-**Version 2026.08 · v1.4.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
+**Version 2026.08 · v1.5.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
 a project from an earlier copy, the changelog tells you what is worth re-copying from
 `starter/`. (The calendar tag says how current your copy is; the SemVer says how much has
 changed and whether anything breaks — see the changelog intro.)
@@ -67,31 +67,32 @@ This guide serves two audiences at once, so it is organised in parts:
 5. [AGENTS.md: the most important file](#agentsmd-the-most-important-file)
 6. [The dual-document pattern: workbook.tex and brief.tex](#the-dual-document-pattern-workbooktex-and-brieftex)
 7. [Session continuity: next-session-prompts.md](#session-continuity-next-session-promptsmd)
-8. [Session length and context limits](#session-length-and-context-limits)
-9. [Plan mode: investigate before you edit](#plan-mode-investigate-before-you-edit)
-10. [Skills: reusable procedures](#skills-reusable-procedures)
-11. [Git workflow for academics](#git-workflow-for-academics)
-12. [Numerics and computation](#numerics-and-computation)
+8. [BUGS.md: the recurring-mistake registry](#bugsmd-the-recurring-mistake-registry)
+9. [Session length and context limits](#session-length-and-context-limits)
+10. [Plan mode: investigate before you edit](#plan-mode-investigate-before-you-edit)
+11. [Skills: reusable procedures](#skills-reusable-procedures)
+12. [Git workflow for academics](#git-workflow-for-academics)
+13. [Numerics and computation](#numerics-and-computation)
 
 **[Part III: Power tools](#part-iii-power-tools)** — *optional; adopt once the basics feel comfortable*
 
-13. [Config and hooks](#config-and-hooks)
-14. [Group projects: shared vs personal configuration](#group-projects-shared-vs-personal-configuration)
-15. [Sub-agents: isolated context for big jobs](#sub-agents-isolated-context-for-big-jobs)
-16. [Reducing token consumption](#reducing-token-consumption)
-17. [The pipeline workflow: keep Codex fluent in your own code](#the-pipeline-workflow-keep-codex-fluent-in-your-own-code)
-18. [distill: filtering noisy research-command output](#distill-filtering-noisy-research-command-output)
-19. [GitHub README and LaTeX](#github-readme-and-latex)
+14. [Config and hooks](#config-and-hooks)
+15. [Group projects: shared vs personal configuration](#group-projects-shared-vs-personal-configuration)
+16. [Sub-agents: isolated context for big jobs](#sub-agents-isolated-context-for-big-jobs)
+17. [Reducing token consumption](#reducing-token-consumption)
+18. [The pipeline workflow: keep Codex fluent in your own code](#the-pipeline-workflow-keep-codex-fluent-in-your-own-code)
+19. [distill: filtering noisy research-command output](#distill-filtering-noisy-research-command-output)
+20. [GitHub README and LaTeX](#github-readme-and-latex)
 
 **[Part IV: What the model gets wrong](#part-iv-what-the-model-gets-wrong)** — *required reading*
 
-20. [Honest limitations](#honest-limitations)
+21. [Honest limitations](#honest-limitations)
 
 **[Appendix](#appendix)**
 
-21. [Templates and scripts in this repo](#templates-and-scripts-in-this-repo)
-22. [The Claude twin: claude-for-researchers](#the-claude-twin-claude-for-researchers)
-23. [Using both: Claude and Codex on one project](#using-both-claude-and-codex-on-one-project)
+22. [Templates and scripts in this repo](#templates-and-scripts-in-this-repo)
+23. [The Claude twin: claude-for-researchers](#the-claude-twin-claude-for-researchers)
+24. [Using both: Claude and Codex on one project](#using-both-claude-and-codex-on-one-project)
 
 ---
 
@@ -331,7 +332,7 @@ soften it.
 > enable it for a single-remote project — it would fail silently. (The hook ships
 > OFF by default for exactly that reason.)
 >
-> **Generate these from what I told you at the start of this session.** All four
+> **Generate these from what I told you at the start of this session.** All five
 > files below must be customised to THIS project. Use the starter files ONLY for
 > their structure — preamble, macros, section layout, comment style — and replace
 > every example sentence and every bracketed stub (`[Project Title]`,
@@ -356,6 +357,12 @@ soften it.
 >   file and section), and a concrete success criterion — all for this project.
 >   Replace the `Prompt A` / `Prompt B` example text entirely; leave the DONE log
 >   empty since nothing is done yet.
+> - `BUGS.md` — based on `starter/BUGS.md`. Keep the standing rule, the legend, and
+>   the section skeleton; put my name and today's date in the standing rule, keep
+>   the sections that match my engine and workflow and delete the rest, and delete
+>   every entry marked `[EXAMPLE]`. Leave the unmarked generic entries — they are
+>   true here too until this project proves otherwise. Do not invent project-specific
+>   traps: the file fills up as we hit them.
 >
 > If `workbook.tex`, `brief.tex`, or any target file already exists, do NOT
 > overwrite it — tell me and stop.
@@ -403,9 +410,9 @@ curl -fsSL https://raw.githubusercontent.com/Mexregkan/chatgpt-for-researchers/m
 
 It asks for the project title, author, numerics engine, and whether you cite
 literature, want the validation skills, or pair with a shared Overleaf project.
-It then installs the universal core — `AGENTS.md` plus the workbook /
-brief / next-session-prompts trio, with your title and author already filled
-in — and **only the skills your answers make relevant**, skipping any skill
+It then installs the universal core — `AGENTS.md`, the workbook /
+brief / next-session-prompts trio with your title and author already filled
+in, and `BUGS.md` — and **only the skills your answers make relevant**, skipping any skill
 already in your user scope (`~/.agents/skills/`). It never overwrites an existing
 file, creates the `generated/` staging folders when you run numerics, and
 offers `git init`.
@@ -1436,6 +1443,145 @@ rather than adding a duplicate; and delete a note the moment it turns out to be
 wrong. Do not store what the repo already records (code structure, git history,
 results that live in the workbook): memory is for the things that are true but
 *not written down anywhere the model will re-read*.
+
+---
+
+## BUGS.md: the recurring-mistake registry
+
+### The problem: the expensive failures do not crash
+
+A bug that raises an error costs you ten minutes. The bugs that cost days are the
+ones that hand back a **plausible number with no error at all** — a pattern that
+matched nothing and so "changed nothing", a control that could not have failed, a
+convention imported from a paper that computes beautifully and answers a different
+question. These do not look like bugs. They look like results.
+
+Two things make them worse in an AI-assisted project. They **recur**: the same
+class of mistake comes back in a new disguise months later, and neither you nor
+Codex remembers the first time. And they are **invisible to review**: the code
+reads fine, the run is clean, the output is a number of the right size.
+
+### The solution: one file, read before any code is written
+
+`BUGS.md` is a registry of every class of mistake the project has hit, each as one
+short **symptom → cause → guard** entry, organised by failure mode. It sits at the
+project root next to the trinity, and it carries a standing rule at the top:
+
+> **Before writing or editing any code, read this file first** and confirm the
+> change does not repeat a mistake below. After hitting a NEW class of bug, add it
+> here in the same turn you fix it.
+
+The unit is the **class**, not the incident. "The run on 3 June gave the wrong
+normalisation" is a logbook entry. "A formula imported from a paper carries the
+paper's conventions, so gate it against something this project measured
+independently" is a registry entry — it will fire again, on a different paper, in
+a different section, next year.
+
+A worked entry, in the shape they all take:
+
+```markdown
+- 🔴⚠ **A rewrite rule that matches nothing returns the input unchanged.**
+  Symptom: a normalisation step "succeeds" and the expression is untouched, so the
+  next stage silently works on un-normalised input. Cause: the pattern was written
+  for the pre-expansion form and never fires after expansion.
+  **Guard: assert the rewrite fired** — compare a term count before and after, and
+  abort if the expression is identical. (workbook §sec:norm; CHANGELOG 2026-06-03.)
+```
+
+Bold the guard. The guard is the reusable part; the symptom is only there so a
+future session recognises the shape.
+
+### The legend, and why the counter matters
+
+Three marks, at the front of each entry:
+
+| Mark | Meaning |
+|------|---------|
+| 🔴 | has bitten us **more than once** |
+| ⚠ | **silent** — produced a confident *wrong answer*, not an error |
+| ✅ | has a **mechanical guard** (an assert that aborts, not a sentence you must remember) |
+
+Promoting an entry from ⚠ to 🔴 the second time it bites is the point of the
+counter: a 🔴 is a standing instruction to go build the ✅. That is the file's real
+endgame — every entry that can be turned into an abort gate should be, and the
+prose entry then stays as the explanation of *why* the gate exists and what it does
+**not** cover.
+
+### The two rules that pay for the whole file
+
+Every version of this file I have seen converges on the same preamble, and it is
+worth carrying in your head even without the file open:
+
+1. **When two diagnostics in one run disagree, the bug is in a diagnostic, not in
+   the science.** That disagreement is usually the *only* tell you get. The
+   temptation is to trust the one that flatters the claim and debug the other.
+2. **A control that cannot fail is worse than no control**, because it reads as
+   confirmation. Before reporting a control as passing, ask what it could possibly
+   have detected — and if the answer is "nothing", say **vacuous** out loud. Make
+   that a word Codex is required to use.
+
+The second one is the single highest-value line to put in `AGENTS.md`, because it
+is a rule about *reporting*, and reporting is exactly where an eager assistant
+rounds "the test was empty" up to "the test passed".
+
+### Add it in the same turn you fix it
+
+This is the discipline that makes the file work, and it is the one that slips. A
+trap written down a week later is written down wrong — the guard has been forgotten
+and only the story survives. The rule is: the commit that fixes the bug also adds
+the entry.
+
+It grows faster than you would expect. In a project running this pattern the file
+went from 279 lines to just over 400 in its first three days, across twelve commits
+— each one the class of mistake that round had just hit. That is not a sign of a bad
+project; it is a count of traps that will not be paid for twice.
+
+### What does NOT go in it
+
+- **Narratives.** The full story of an incident goes in `workbook.tex` and gets a
+  `CHANGELOG.md` row; the entry links to them in one parenthesis. An entry with no
+  guard is a story, and it will not survive being skimmed.
+- **Open questions or to-dos.** Those belong in
+  [`next-session-prompts.md`](#session-continuity-next-session-promptsmd). A
+  registry of mistakes is not an issue tracker: nothing here is ever "closed", and
+  entries stay after they are fixed — the guard is the whole value.
+- **A second copy of anything.** If a rule already lives in `AGENTS.md` or a skill,
+  point at it. Two copies drift, and the stale one gets believed.
+
+### Wiring it in
+
+Three lines of setup, and it is worth doing all three:
+
+1. **A pointer in `AGENTS.md`**, in the *Files* list, marked non-optional: "read
+   `BUGS.md` before writing or editing any code."
+2. **A place in the session-start order.** Put it third — after the status snapshot
+   and the task queue, before any code is opened.
+3. **A first step in code-heavy skills.** A skill that drives a long build can open
+   with "read `BUGS.md`; if the failure you are seeing is not in it, stop and
+   report" — which is also how new entries get noticed.
+
+Keeping it a **separate file rather than a `GOTCHAS` section of `AGENTS.md`** is the
+whole design, and it matters more here than in most ecosystems: `AGENTS.md` is
+loaded in full at the start of every session and is subject to a size budget
+(`project_doc_max_bytes`, 32 KiB by default — see
+[Config and hooks](#config-and-hooks)). A trap list grows without limit and is only
+needed when code is about to be written, so it does not belong in the always-loaded
+file. One project that started with the traps inside its instruction file moved them
+out for exactly this reason, leaving a pointer behind. If a **second agent** works in
+the repo, that same pointer means both agents read one registry —
+[the same one-source-of-truth rule](#using-both-claude-and-codex-on-one-project)
+that makes `AGENTS.md` itself shared.
+
+That relocation is the honest cost argument, too. `BUGS.md` is not free — it is
+several hundred lines, and reading it before code work costs tokens every time. It
+earns that by being read **on demand rather than always**, by staying a checklist
+instead of a log, and by shrinking in effect over time as its 🔴 entries turn into
+✅ gates. If your copy stops earning it, the fix is to promote entries into asserts,
+not to stop reading it.
+
+The template is [`starter/BUGS.md`](starter/BUGS.md) — the section skeleton, the
+legend, the standing rule, and a small set of starting entries that are true in
+almost any computational project.
 
 ---
 
@@ -2930,26 +3076,23 @@ Some tool failures announce themselves with a stack trace. The dangerous ones do
 not — they hand back a *wrong answer* with no error at all, and you lose an hour
 before you even suspect the tool. These traps recur, and they are invisible, so the
 highest-leverage habit is to write each one down the first time it bites: the
-symptom, the cause, and the fix. Keep them in a `GOTCHAS` section of AGENTS.md (or
-a notes folder it points to — see
-[the memory section](#memory-codexs-memories-feature-vs-what-goes-in-agentsmd)),
-and a returning session — or a cheaper model — recognises in ten seconds what
-first cost you an hour.
+symptom, the cause, and the guard.
 
-The traps worth logging are the silent ones. A few examples of the *shape* (yours
-will be different):
+That habit has a home: **[`BUGS.md`](#bugsmd-the-recurring-mistake-registry)**, the
+recurring-mistake registry, read before any code is written. The mechanics — entry
+format, the 🔴/⚠/✅ marks, what belongs there versus in the workbook, and why it is
+its own file rather than a `GOTCHAS` section of the always-loaded `AGENTS.md` — are
+in that section; this one is only here to say *why* it is filed under "what the model
+gets wrong". Nearly every entry in a mature registry describes a run that produced a
+confident wrong **number**: a vacuous control, a false refutation of something already
+proved, a convention mismatch that computes perfectly and answers a different
+question. None of them look like limitations while they are happening. That is what
+makes them worth a file of their own.
 
-- A script runner that silently **drops continuation lines**, so a multi-line
-  expression is truncated and returns a plausible-but-wrong number — no error. Fix:
-  one expression per line, plus a sanity print of the term count.
-- A numerical routine that **loses precision** on inputs with a large dynamic
-  range, quietly returning fewer good digits than you think. Fix: a more stable
-  formulation, and a precision gate that fails loudly.
-- A long recurrence where **significance collapses** part-way through. Fix:
-  fixed-precision arithmetic with an a-posteriori check.
-
-The point is not these specific traps but the reflex: the moment a tool hands you a
-wrong answer with a straight face, log it before you fix it.
+[Codex's memories feature](#memory-codexs-memories-feature-vs-what-goes-in-agentsmd)
+is the complement, not the substitute — and since it is experimental and off by
+default, the file is doing the real work here. The reflex is the same either way: the
+moment a tool hands you a wrong answer with a straight face, log it before you fix it.
 
 ---
 
@@ -2968,6 +3111,7 @@ project root. It gives you everything you need in the right place, ready to fill
 starter/
 ├── AGENTS.md                        ← fill in your project details
 ├── next-session-prompts.md          ← session continuity log
+├── BUGS.md                          ← recurring-mistake registry; read before writing any code
 ├── workbook.tex                     ← LaTeX stub for the working record (overwrite if you have one)
 ├── brief.tex                        ← condensed-reference stub (overwrite if you have one)
 ├── bigPicture.tex                   ← (big projects — optional) equation-light overview; read before the workbook
@@ -3027,6 +3171,7 @@ in Part I.
 |------|------------|
 | [`starter/AGENTS.md`](starter/AGENTS.md) | Starting AGENTS.md for any research project, with all sections and explanatory comments |
 | [`starter/next-session-prompts.md`](starter/next-session-prompts.md) | Session log template with format examples |
+| [`starter/BUGS.md`](starter/BUGS.md) | **Recurring-mistake registry**: one short `symptom → cause → guard` entry per class of mistake the project has hit, organised by failure mode, with the 🔴 (bitten twice) / ⚠ (silent wrong answer) / ✅ (mechanical guard) marks. Carries the standing rule — read it before writing or editing any code, and add a new class in the same turn you fix it. Kept out of `AGENTS.md` deliberately: a trap list grows without limit and the instruction file is loaded in full every session. Ships a section skeleton plus starting entries that are true in almost any computational project. Agent-agnostic — byte-identical to the Claude twin's copy |
 | [`starter/workbook.tex`](starter/workbook.tex) | LaTeX stub for the working record: preamble, theorem environments, skeleton sections — the research journal where proofs, derivations, and discussions live |
 | [`starter/brief.tex`](starter/brief.tex) | Condensed-reference stub with status tags (ESTABLISHED/CONJECTURED/OPEN) and cross-reference structure — fill in as results accumulate |
 | [`starter/bigPicture.tex`](starter/bigPicture.tex) | (Big projects — optional) Equation-light **overview** document — the five-minute on-ramp read *before* the workbook; ships proven / open status-ledger boxes ready to fill in. The top tier of the overview → brief → workbook stack |

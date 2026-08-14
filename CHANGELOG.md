@@ -12,6 +12,64 @@ version (`MAJOR.MINOR.PATCH`): **PATCH** for a fix or clarification, **MINOR** f
 skill/tool/guide section, **MAJOR** only if an update would break an existing setup (force
 a re-copy to keep working).
 
+## v2026.08 · v1.5.0 — 2026-08-14 (update)
+
+### Added
+- **`BUGS.md` — the recurring-mistake registry**, now a fifth universal file alongside
+  `AGENTS.md` and the trinity, with a new guide section
+  ([BUGS.md: the recurring-mistake registry](README.md#bugsmd-the-recurring-mistake-registry))
+  and a [`starter/BUGS.md`](starter/BUGS.md) template. The premise: the bugs that cost days
+  are the ones that hand back a **plausible number with no error at all** — a pattern that
+  matched nothing and so "changed nothing", a control that could not have failed, a
+  convention imported from a paper that computes perfectly and answers a different question.
+  They recur, and they are invisible to code review. So each one gets a short
+  `symptom → cause → guard` entry, filed by failure mode, and the file carries a standing
+  rule at the top: **read it before writing or editing any code, and add a new class in the
+  same turn you fix it**.
+  - **The unit is the class, not the incident.** "The run on 3 June gave the wrong
+    normalisation" is a logbook entry; "a formula imported from a paper carries the paper's
+    conventions, so gate it against something this project measured independently" is a
+    registry entry — it will fire again, on a different paper, next year. Narratives stay in
+    `workbook.tex` and `CHANGELOG.md`; the entry links to them in one parenthesis.
+  - **Three marks that make it self-maintaining**: 🔴 has bitten us more than once · ⚠ silent
+    (a confident wrong answer, not an error) · ✅ has a mechanical guard. Promoting an entry
+    to 🔴 the second time it bites is a standing instruction to go build the ✅ — an assert
+    that aborts beats a sentence you have to remember, and the prose entry then survives as
+    the explanation of what the gate does *not* cover.
+  - **Why a separate file rather than a `GOTCHAS` section of `AGENTS.md`**: the instruction
+    file is loaded in full at the start of every session and is subject to
+    `project_doc_max_bytes` (32 KiB by default). A trap list grows without limit and is only
+    needed when code is about to be written — so it is read on demand instead, and a second
+    agent in the repo reads the same one registry.
+  - **Two rules worth adopting even without the file**, both now in `starter/AGENTS.md`:
+    *if two diagnostics in one run disagree, the bug is in a diagnostic, not in the science*;
+    and *a control that cannot fail is worse than no control* — before calling a control
+    passed, state what it could have detected, and if the answer is "nothing", call it
+    **vacuous**. The second is a rule about *reporting*, which is exactly where an eager
+    assistant rounds "the test was empty" up to "the test passed".
+  - The template ships the section skeleton, the legend, the standing rule, and a set of
+    starting entries that are true in almost any computational project. It is
+    **agent-agnostic and byte-identical to the Claude twin's copy** — like the `handoff/`
+    mailbox kit, a fix on either side belongs on both.
+
+### Changed
+- **The trap-log advice in *Honest limitations* is now a pointer, not a second copy.** That
+  section previously suggested keeping traps in a `GOTCHAS` section; it now explains *why*
+  silent wrong answers belong under "what the model gets wrong" and sends the reader to the
+  registry for the mechanics. Codex's memories feature is the complement, not the substitute
+  — and since it is experimental and off by default, the file does the real work here.
+- **`scripts/bootstrap.sh` installs `BUGS.md` for every project**, and both setup routes
+  (the paste-in prompt and the script) now ask Codex to stamp your name and date into the
+  standing rule, keep the sections matching your engine, and delete the `[EXAMPLE]` entries.
+
+**Action needed (optional):** copy [`starter/BUGS.md`](starter/BUGS.md) into your project
+root and add the pointer + standing rule to your `AGENTS.md` (the block is in
+[`starter/AGENTS.md`](starter/AGENTS.md), under *Recurring mistakes*). Nothing breaks
+without it — but the file only starts paying when something is written in it, so the useful
+first step is to add the last trap that cost you an afternoon.
+
+*Mirrors the Claude twin's v1.13.0.*
+
 ## v2026.08 · v1.4.0 — 2026-08-09 (update)
 
 ### Changed

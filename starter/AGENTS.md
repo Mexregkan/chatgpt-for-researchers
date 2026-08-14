@@ -35,6 +35,11 @@ domain as a function of their spectral parameters, using the Rankin–Selberg un
   (e.g., workbookAlice.tex, workbookBob.tex) to clarify ownership and reduce merge conflicts.
   Everyone pulls results into the shared brief.tex.*
 - **next-session-prompts.md** — task log. Top section = next task; bottom = DONE log.
+- **BUGS.md** — the recurring-mistake registry. ⚠ **READ IT BEFORE WRITING OR EDITING ANY
+  CODE** (see the standing rule below). One `symptom → cause → guard` entry per class of
+  mistake this project has hit; the full story of each lives in workbook.tex / CHANGELOG.md.
+  It is a separate file on purpose — this one is loaded in full every session and has a size
+  budget; a trap list does not.
 - **numerics/** — computation scripts. `README.md` inside explains each file.
 - **scripts/** — helper scripts (if any; most helpers ship inside their skill folders).
 - **handoff/** — the mailbox shared with the other agent. `INBOX.md` is the index;
@@ -105,6 +110,23 @@ render in the Codex terminal or VS Code chat panel. Write math in plain Unicode:
   single subscripts/superscripts (one char): M₃, μ₀, sᵢ, x², yⁿ
   multi-char sub/superscripts: M_{ab}, e^{-π t}, τ^{-2}
 LaTeX belongs ONLY inside .tex files.
+
+## Recurring mistakes: BUGS.md (NON-NEGOTIABLE)
+<!-- The traps that produce a confident WRONG ANSWER rather than an error. Keeping them in
+     their own file (read before code work) instead of here keeps this file — which is read
+     in full every session, under a size budget — from growing without limit. -->
+
+**Before writing or editing any code, read `BUGS.md`** and confirm the change does not
+repeat a mistake in it. When a NEW class of bug bites, add it there — symptom → cause →
+guard — **in the same turn you fix it**, and never as a second copy of a rule that already
+lives here or in a skill.
+
+Two rules from that file apply to everything you report, not just to code:
+
+- **If two diagnostics in one run disagree, the bug is in a diagnostic** — not in the
+  science. Say which one you distrusted and why.
+- **A control that cannot fail is worse than no control.** Before calling a control passed,
+  state what it could have detected; if the answer is "nothing", call it **vacuous**.
 
 ## Citations (NON-NEGOTIABLE)
 <!-- Prevents fabricated references. Every model invents citations with full confidence. -->
