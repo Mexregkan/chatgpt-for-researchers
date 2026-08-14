@@ -12,9 +12,22 @@
 # workspace, etc.). Nothing is hard-blocked; you approve or refuse in the moment.
 
 # --- Permissions -------------------------------------------------------------
-# Equivalent of the "Ask for approval" permission mode, stated explicitly.
+# Equivalent of the "Ask for approval" permission mode (the default), stated
+# explicitly. The other named modes: "Approve for me" sends boundary crossings to
+# an automatic reviewer agent instead of to you — same sandbox boundary, opt-in
+# via approvals_reviewer = "auto_review", and OpenAI notes it "carries elevated
+# risk of mistakes"; "Full access" removes the sandbox entirely (avoid).
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
+
+# ⚠ WHAT NEITHER THE SANDBOX NOR THE REVIEWER PROTECTS: anything INSIDE the
+# workspace. In-sandbox file edits never cross a boundary, so they are never
+# reviewed in either mode — an overwrite of a ground-truth data file that took
+# weeks of CPU looks exactly like a scratch write. There is no per-path deny key
+# (writable_roots only EXTENDS where writes are allowed). So keep irreplaceable
+# data OUTSIDE the workspace root, which makes any write to it a boundary
+# crossing, and forbid destructive command prefixes with an execution-policy rule
+# in ~/.codex/rules/default.rules. See the guide's "Config and hooks" section.
 
 [sandbox_workspace_write]
 # Research sessions constantly fetch packages, arXiv pages, and data — allow

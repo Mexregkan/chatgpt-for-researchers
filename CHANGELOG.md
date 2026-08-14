@@ -12,6 +12,57 @@ version (`MAJOR.MINOR.PATCH`): **PATCH** for a fix or clarification, **MINOR** f
 skill/tool/guide section, **MAJOR** only if an update would break an existing setup (force
 a re-copy to keep working).
 
+## v2026.08 · v1.6.0 — 2026-08-14 (update)
+
+### Added
+- **The permission modes are now documented properly, including "Approve for me".**
+  Previously this guide mentioned auto-review only as a one-line aside. It now carries the
+  full table — **Ask for approval** (the default: `workspace-write` / `on-request`, you are
+  the reviewer), **Approve for me**, **Full access**, **Custom** — plus a subsection on what
+  delegating approvals actually buys you. In "Approve for me", Codex routes each approval
+  request to a **separate reviewer agent** that decides and returns a rationale; it is
+  designed to deny sending secrets or credentials to untrusted locations, credential and
+  token extraction, broad security weakening, and irreversibly destructive operations. The
+  policy is open source and customisable, and organisations can pin their own via
+  `guardian_policy_config` in managed requirements. Enable it with
+  `approvals_reviewer = "auto_review"` alongside `approval_policy = "on-request"`, from
+  `/permissions`, or under **Settings → General → Permissions** in the desktop app. It is
+  **not** the default, and OpenAI notes it "carries elevated risk of mistakes".
+  - Two properties decide how much it protects you: it **does not widen the sandbox** (it
+    changes *who decides* about a boundary crossing, not where the boundary sits), and
+    **routine in-sandbox actions bypass review entirely** — only boundary crossings reach
+    the reviewer.
+
+### Changed
+- **New subsection: protecting what is irreplaceable** — the consequence of that second
+  property, and the one thing neither the sandbox nor the reviewer does for you. An
+  overwrite of a ground-truth data file *inside* the workspace never crosses a boundary, so
+  it is never reviewed in either mode; a table that took three weeks of CPU looks exactly
+  like a scratch file to an OS-level sandbox. Codex has **no per-path deny list** —
+  `sandbox_workspace_write.writable_roots` only *extends* where writes are allowed, and
+  there is no `exclude` key — so the guide now recommends the two mechanisms that do work:
+  **keep irreplaceable data outside the workspace root** (making any write to it a boundary
+  crossing, enforced by the OS), and **forbid destructive command prefixes** with an
+  execution-policy rule. Rules live in `~/.codex/rules/default.rules`, are written in
+  Starlark (`prefix_rule(pattern = ["rm", "-rf"], decision = "forbidden", …)`, where the
+  most restrictive match wins), and are checkable with
+  `codex execpolicy check --rules <file> -- <command>`. They are still marked experimental,
+  and the guide says so.
+- `starter/.codex/config.toml` carries the same warning inline, next to the keys it applies
+  to.
+- The Claude/Codex differences table now states the real distinction rather than implying
+  the two are equivalent: Claude's auto mode is a *session-wide default baseline*; Codex's
+  "Approve for me" is *opt-in* and only vets *boundary crossings*, with the sandbox — not a
+  classifier — as the primary mechanism.
+
+**Action needed (optional):** none for existing setups; the default mode is unchanged. If
+you keep irreplaceable data inside your project folder, the new subsection is worth five
+minutes — moving it outside the workspace root is what turns a silent overwrite into a
+prompt.
+
+*Mirrors the Claude twin's v1.14.0/v1.14.1 permissions work, adapted: the two ecosystems
+differ more here than anywhere else in these guides.*
+
 ## v2026.08 · v1.5.0 — 2026-08-14 (update)
 
 ### Added

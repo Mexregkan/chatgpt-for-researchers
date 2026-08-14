@@ -21,7 +21,7 @@ workflow so that *you* can do the research faster and more cleanly: less time on
 housekeeping, better continuity across sessions, fewer mistakes from working in a big
 messy codebase. Codex is the tool; you are the researcher.
 
-**Version 2026.08 · v1.5.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
+**Version 2026.08 · v1.6.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
 a project from an earlier copy, the changelog tells you what is worth re-copying from
 `starter/`. (The calendar tag says how current your copy is; the SemVer says how much has
 changed and whether anything breaks — see the changelog intro.)
@@ -2468,16 +2468,89 @@ This is Codex's "Ask for approval" permission mode stated explicitly: LaTeX,
 Python, git, and file edits inside the project run without interruption, and
 Codex pauses to ask only when something needs to leave the sandbox. Nothing is
 ever hard-blocked; you approve or refuse in the moment. It is the same
-philosophy as the Claude twin's "allow routine, ask before dangerous" permission
-lists, expressed through a sandbox instead of a command list — arguably a
-stronger mechanism, because the boundary is enforced by the operating system
-rather than by pattern-matching on command strings.
+philosophy as the Claude twin's "ask before dangerous" permission rules,
+expressed through a sandbox instead of a command list — arguably a stronger
+mechanism, because the boundary is enforced by the operating system rather than
+by pattern-matching on command strings.
+
+The named modes, which the `/permissions` command and the desktop app's
+**Settings → General → Permissions** both expose:
+
+| Mode | What it does | Sandbox / approvals / reviewer |
+|------|--------------|-------------------------------|
+| **Ask for approval** (default) | Reads and edits workspace files, runs routine local commands; pauses before internet use or crossing the workspace boundary | `workspace-write` / `on-request` / **you** |
+| **Approve for me** | Same workspace boundary — but boundary crossings go to an automatic reviewer instead of to you | `workspace-write` / `on-request` / **auto-review** |
+| **Full access** | Edits any file on the machine, runs commands with network access, never asks | no sandbox / `never` / — |
+| **Custom** | Whatever you write in `config.toml` | your keys |
+
+#### "Approve for me": delegating approvals to a reviewer agent
+
+Instead of stopping for you, Codex routes each approval request to a **separate
+reviewer agent**, which decides whether the action runs and returns a rationale.
+It is designed to deny sending private data, secrets, or credentials to
+untrusted locations; attempts to extract credentials, tokens, or session
+material; broad security weakening; and destructive operations with irreversible
+consequences. The policy itself is open source and customisable, and an
+organisation can pin its own through `guardian_policy_config` in managed
+requirements, which overrides local settings.
+
+Turn it on with `approval_policy = "on-request"` plus
+`approvals_reviewer = "auto_review"` in `config.toml`, from `/permissions` in the
+CLI, or under **Settings → General → Permissions** in the desktop app. It is
+**not** the default, and OpenAI's own documentation notes it "carries elevated
+risk of mistakes."
+
+Two properties are worth holding onto, because they decide how much this
+actually protects you:
+
+1. **It does not widen the sandbox.** Changing the reviewer changes *who
+   decides* about a boundary crossing, not where the boundary sits. This is a
+   genuinely different design from the Claude twin's auto mode, which is a
+   session-wide baseline that lets far more run unprompted.
+2. **Routine in-sandbox actions bypass review entirely.** Only boundary-crossing
+   requests — shell escalations, blocked network access, restricted file edits —
+   reach the reviewer at all.
+
+#### Protecting what is irreplaceable
+
+Property 2 above has a sharp consequence for research, and it is the one thing
+neither the sandbox nor the reviewer will do for you. **An overwrite of your
+ground-truth data file, if it lives inside the workspace, is routine in-sandbox
+activity.** It is never reviewed — not in "Ask for approval", not in "Approve for
+me" — because it never crosses a boundary. A table that took three weeks of CPU
+to produce looks exactly like a scratch file to an OS-level sandbox.
+
+Codex has **no per-path deny list**: `sandbox_workspace_write.writable_roots`
+only *extends* where writes are allowed, and there is no `exclude` or
+read-only-paths key to carve holes back out. So the Claude twin's answer — a
+`deny` rule naming the precious directory — has no direct equivalent here. Two
+mechanisms do the job instead:
+
+- **Keep irreplaceable data outside the workspace root.** Then any write to it
+  *is* a boundary crossing, and it prompts you (or reaches the reviewer). This is
+  the Codex-native version of a protected path, and it is the more robust of the
+  two because the operating system enforces it.
+- **Forbid the destructive command prefixes** with an execution-policy rule.
+  Rules live in a `.rules` file under a `rules/` folder alongside an active
+  config layer (e.g. `~/.codex/rules/default.rules`) and are written in Starlark:
+
+  ```python
+  prefix_rule(
+      pattern = ["rm", "-rf"],
+      decision = "forbidden",
+      justification = "Use git rm or move to trash instead",
+  )
+  ```
+
+  `decision` is `"allow"`, `"prompt"`, or `"forbidden"`, the most restrictive
+  matching rule wins, and you can check a command against your rules with
+  `codex execpolicy check --rules ~/.codex/rules/default.rules -- <command>`.
+  Rules are still marked **experimental**, so verify yours with that command
+  rather than assuming.
 
 > **Stricter or looser when you need it:** `codex --sandbox read-only` for a
-> look-don't-touch session; `/permissions` to see or change the mode mid-session.
-> Approvals can also be delegated to an automatic reviewer model ("Approve for
-> me" mode) — interesting, but for research we recommend staying the reviewer
-> yourself.
+> look-don't-touch session; `/permissions` to see or change the mode
+> mid-session.
 
 Because the project config only activates for **trusted** projects (you confirm
 trust the first time you open the folder), checking `.codex/config.toml` into a
@@ -3235,7 +3308,7 @@ agent-specific wiring:
 | This repo (ChatGPT / Codex) | Twin (Claude Code) |
 |---|---|
 | `AGENTS.md` — global `~/.codex/AGENTS.md`, personal `AGENTS.override.md` | `CLAUDE.md` — global `~/.claude/CLAUDE.md`, personal `CLAUDE.local.md` |
-| `.codex/config.toml` — OS-level sandbox (`workspace-write`) + approval policy (`on-request`) | `.claude/settings.json` — allow/ask permission lists |
+| `.codex/config.toml` — OS-level sandbox (`workspace-write`) + approval policy (`on-request`). Delegating approvals to a reviewer agent (**"Approve for me"**) is opt-in and keeps the same sandbox boundary | `.claude/settings.json` — ask/deny rules on top of a permission mode. Its reviewer equivalent (**auto mode**) is the *default* since Aug 2026 and is a session-wide baseline, not a boundary-crossing check |
 | Skills: `.agents/skills/<name>/SKILL.md`, invoked `$name` | Same SKILL.md folder standard: `.claude/skills/<name>/SKILL.md`, invoked `/name` |
 | User-scope skills: `~/.agents/skills/` | Global skills: `~/.claude/skills/` |
 | Hooks declared in `.codex/hooks.json`; each script trusted once via `/hooks` | Hooks declared in `.claude/settings.json` |
