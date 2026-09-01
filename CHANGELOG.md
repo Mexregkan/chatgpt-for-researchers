@@ -12,6 +12,45 @@ version (`MAJOR.MINOR.PATCH`): **PATCH** for a fix or clarification, **MINOR** f
 skill/tool/guide section, **MAJOR** only if an update would break an existing setup (force
 a re-copy to keep working).
 
+## v2026.08 · v1.7.0 — 2026-08-25 (update)
+
+### Added
+- **A commit-and-push sub-agent, [`git-committer`](starter/.codex/agents/git-committer.toml)**
+  — the second agent to ship in `starter/`, and the first that is not tied to an optional
+  workflow. The idea: stop letting the main session run `git commit` at all. A research
+  working tree is almost never clean, and a session that is deep in a long task reaches for
+  `git add -A`; your half-finished workbook section then lands in the permanent record
+  attached to somebody else's commit message. The agent stages **only** the files it was
+  named — never `git add .`, `-A`, `-u`, or a glob it expanded itself — appends nothing to
+  your message (no `Co-Authored-By`), refuses the protected files you list, pushes to each
+  remote in the order you gave, and reports git's own output verbatim. A rejected push stops
+  and reports; it never pulls, merges, rebases, or forces on its own.
+- New guide subsection, **"Give commits to a dedicated sub-agent"**, in
+  [Git workflow for academics](README.md#git-workflow-for-academics) — the failure mode, the
+  rules and why each one is there, and the two project blocks you fill in inside
+  `developer_instructions` (your repos with their remotes and push order, and your protected
+  files). If your tree contains a nested repo — a sub-project with its own remote, or a cloned
+  `Overleaf/` — you list it there with its own rule, including "never push this one", so the
+  agent cannot publish to a shared paper by accident.
+- **Two Codex specifics are stated honestly rather than glossed.** The committer runs
+  `sandbox_mode = "workspace-write"`, not the auditor's `read-only`, because git writes; and
+  Codex agent TOML has **no per-agent tool allowlist**, so there is no way to hand an agent
+  git without also handing it your editor — "it never modifies your sources" is enforced by
+  its instructions, not by the platform. (The Claude twin's equivalent agent can simply omit
+  the edit tool; the differences table now says so.) Separately, `git push` needs the network:
+  with `network_access = true` it runs inside the sandbox, and with it `false` the push raises
+  an approval request that can surface from the inactive agent thread — check `/agent` if a
+  commit seems to hang.
+- The bootstrap script installs it as part of the **universal core** (every project commits),
+  and the README's bootstrapping prompt tells Codex to fill in its project blocks in
+  session 1.
+
+### Action needed
+- Optional. Existing projects: copy
+  [`starter/.codex/agents/git-committer.toml`](starter/.codex/agents/git-committer.toml) into
+  `.codex/agents/` and fill in the two project blocks inside `developer_instructions`.
+  Nothing else changes if you don't.
+
 ## v2026.08 · v1.6.0 — 2026-08-14 (update)
 
 ### Added

@@ -119,10 +119,14 @@ core starter/.codex/config.toml               .codex/config.toml
 core starter/.codex/hooks.json                .codex/hooks.json
 core starter/.codex/hooks/pre-compact.sh      .codex/hooks/pre-compact.sh
 core starter/.codex/hooks/promise-checker.sh  .codex/hooks/promise-checker.sh
+core starter/.codex/agents/git-committer.toml .codex/agents/git-committer.toml
 chmod +x .codex/hooks/*.sh 2>/dev/null
 say "  -> BUGS.md is the recurring-mistake registry: one symptom -> cause -> guard entry"
 say "     per class of mistake, read before writing any code. It ships with generic"
 say "     starting entries; replace them with your own as the project bites you."
+say "  -> git-committer is the commit-and-push sub-agent (every commit goes through it,"
+say "     so nothing ever gets \`git add .\`-ed by accident). FILL IN its two project"
+say "     blocks: your repos + remotes + push order, and your protected files."
 
 # Big-project templates (optional): the equation-light overview doc, the strategy
 # map, and the research changelog. Only useful once a project is large /

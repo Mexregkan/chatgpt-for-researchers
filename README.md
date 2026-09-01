@@ -21,7 +21,7 @@ workflow so that *you* can do the research faster and more cleanly: less time on
 housekeeping, better continuity across sessions, fewer mistakes from working in a big
 messy codebase. Codex is the tool; you are the researcher.
 
-**Version 2026.08 · v1.6.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
+**Version 2026.08 · v1.7.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
 a project from an earlier copy, the changelog tells you what is worth re-copying from
 `starter/`. (The calendar tag says how current your copy is; the SemVer says how much has
 changed and whether anything breaks — see the changelog intro.)
@@ -290,6 +290,14 @@ soften it.
 > - `.codex/hooks.json`, `.codex/hooks/pre-compact.sh`, and
 >   `.codex/hooks/promise-checker.sh`
 > - `.gitignore` (from `starter/.gitignore`)
+>
+> **Copy this one and then fill it in:** `.codex/agents/git-committer.toml` (from
+> `starter/.codex/agents/git-committer.toml`) — the sub-agent that does every commit
+> and push. Inside `developer_instructions`, replace the two clearly-marked project
+> blocks with my real repos (their remotes and push order, including any nested repo
+> such as an `Overleaf/` clone that must never be pushed) and my protected files. Ask
+> me for anything you do not know; do not guess a remote. From now on, use this agent
+> for every commit and push instead of running `git commit` yourself.
 >
 > **Install skills by relevance — NOT all of them.** The four generated files
 > below are universal; skills are not. From my project description, decide which
@@ -2086,6 +2094,70 @@ for how to enable it). You can also ask Codex to keep an experimental branch on
 only one remote until you are ready to publish it — just tell it which remote to
 use.
 
+### Give commits to a dedicated sub-agent
+
+Once you have told Codex your git setup, there is one more step that is worth more
+than it looks: stop letting the main session run `git commit` and `git push` at all,
+and hand every commit to a **sub-agent** whose only job is committing.
+
+A sub-agent is a second Codex thread with its own context window, its own standing
+instructions, and its own sandbox mode. You define one as a TOML file in
+`.codex/agents/`; the main session spawns it, it does its job, and it returns a short
+report. Nothing it read along the way lands in your session's context. (Sub-agents in
+general are covered in [Sub-agents: isolated context for big jobs](#sub-agents-isolated-context-for-big-jobs).)
+
+**Why a committer deserves one.** The failure mode is specific and it is expensive.
+Your working tree in a research project is almost never clean: a half-edited section
+of `workbook.tex`, a scratch script, an experiment you have not decided about. When
+the main session — deep in a long task, context half-full — is asked to "commit the
+new numerics", the tempting shortcut is `git add -A`. Now your half-finished section
+is in the permanent record, attached to a commit message about something else, and
+you will not notice until you go looking for it weeks later. The same shortcut is
+how a `Co-Authored-By` trailer, a force-push, or a commit on the wrong branch gets
+in. None of these are hard mistakes to avoid; they are mistakes of *attention*, and
+a fresh agent with one instruction has attention to spare.
+
+The starter ships [`git-committer`](starter/.codex/agents/git-committer.toml). Its
+rules are the ones that have actually cost people something:
+
+- **Stage only the files the caller names** — never `git add .`, `-A`, `-u`, or a
+  glob the agent expanded itself. This one rule is most of the value.
+- The commit message is **exactly** what was passed. Nothing appended.
+- Named protected files (the ones you write by hand) stop the commit rather than
+  going in.
+- Push to every remote you listed, in order, and report git's own output verbatim.
+- A rejected push stops and reports. It never pulls, merges, rebases, or forces on
+  its own initiative — the remote moved, and only you can decide why.
+
+**Two Codex specifics, and the second is a limitation worth knowing.** First, the
+committer sets `sandbox_mode = "workspace-write"`, not the `read-only` of the
+[`pipeline-auditor`](starter/.codex/agents/pipeline-auditor.toml) — a committer has
+to write, because git writes. Second, and this is the honest part: Codex agent TOML
+has **no per-agent tool allowlist**. There is no way to hand an agent git without
+also handing it your editor. So "this agent never modifies your source files" is
+enforced by its instructions, not by the platform — weaker than the read-only
+auditor sitting next to it, and weaker than the equivalent agent in Claude Code,
+whose front matter can simply omit the edit tool. The protection that does the real
+work here is the same one that matters in the main session: the agent may stage only
+what you named.
+
+Also note that `git push` needs the network. With `network_access = true` in
+[`.codex/config.toml`](starter/.codex/config.toml) the push runs inside the sandbox;
+with it `false`, the push is a boundary crossing and raises an approval request —
+which can surface from the inactive agent thread while you are looking at the main
+one. If a commit seems to hang, check `/agent`.
+
+**Setting it up.** Copy the file into `.codex/agents/` (the bootstrap script does
+this for you), then fill in the two clearly-marked project blocks inside
+`developer_instructions`: your repos with their remotes and push order, and your
+protected files. That is the whole setup. If your tree contains a nested repo — a
+sub-project with its own remote, or a cloned `Overleaf/` (next section) — list it
+there with its own push rule, including "never push this one", so the agent can
+never publish to a shared paper by accident.
+
+Then just work normally. "Commit the new script and push" now goes to an agent that
+will come back with a hash, a file list, and the remote's exact reply.
+
 ### Working with a shared Overleaf project (git clone)
 
 Most collaborative papers live on Overleaf, but no local coding agent can see an
@@ -2657,7 +2729,9 @@ file is which.
 - **`.agents/skills/`** — project skills. A skill that encodes "how we compile this
   paper" or "how we sync the notebook" should be identical for everyone.
 - **`.codex/hooks.json` and `.codex/hooks/`** — shared hooks and the scripts they call.
-- **`.codex/agents/`** — shared sub-agent definitions (like the pipeline-auditor).
+- **`.codex/agents/`** — shared sub-agent definitions (the git-committer, the
+  pipeline-auditor). The committer in particular encodes the group's push order and
+  protected files, so everyone commits the same way.
 
 **Keep these personal — never commit them:**
 
@@ -2743,10 +2817,12 @@ returns just the answer; your session stays clean.
 
 Custom sub-agents can be defined as TOML files in `.codex/agents/` (project) or
 `~/.codex/agents/` (personal) — a name, a description, standing instructions, and
-optionally their own model or sandbox. The starter ships one:
-[`pipeline-auditor`](starter/.codex/agents/pipeline-auditor.toml), a read-only
+optionally their own model or sandbox. The starter ships two:
+[`git-committer`](starter/.codex/agents/git-committer.toml), which does every commit
+and push (see [Give commits to a dedicated sub-agent](#give-commits-to-a-dedicated-sub-agent)),
+and [`pipeline-auditor`](starter/.codex/agents/pipeline-auditor.toml), a read-only
 code auditor for the [pipeline workflow](#the-pipeline-workflow-keep-codex-fluent-in-your-own-code).
-Its definition sets `sandbox_mode = "read-only"`, which is worth pausing on: the
+The auditor sets `sandbox_mode = "read-only"`, which is worth pausing on: the
 auditor *cannot* edit your code, not because it was asked nicely but because the
 platform will not let it. Use that pattern for any agent whose job is to inspect
 rather than change.
@@ -3213,6 +3289,7 @@ starter/
 │   │   ├── pipeline-guard.sh        ← (pipeline workflow — opt-in) PostToolUse nudge; self-quiets until a Pipeline/ doc exists
 │   │   └── pipeline-coverage.sh     ← (pipeline workflow — optional) on-demand coverage check
 │   └── agents/
+│       ├── git-committer.toml       ← commit-and-push sub-agent: stages only what it was named, never `git add .`
 │       └── pipeline-auditor.toml    ← (pipeline workflow — optional) read-only bug/optimization auditor sub-agent
 └── .agents/
     └── skills/
@@ -3257,6 +3334,7 @@ in Part I.
 | [`starter/.codex/hooks/pre-compact.sh`](starter/.codex/hooks/pre-compact.sh) | PreCompact hook: timestamps AGENTS.md and snapshots the task log before context compression |
 | [`starter/.codex/hooks/promise-checker.sh`](starter/.codex/hooks/promise-checker.sh) | Stop hook: catches "I'll remember / I've saved" without a corresponding file edit |
 | [`starter/.codex/hooks/git-mirror.sh`](starter/.codex/hooks/git-mirror.sh) | (Opt-in) PostToolUse hook: after a push to the primary remote, mirrors to the secondary via `scripts/git-push-both.sh` |
+| [`starter/.codex/agents/git-committer.toml`](starter/.codex/agents/git-committer.toml) | Sub-agent: does every commit and push, so the main session never runs `git commit` itself. Stages only the files it was named (never `git add .`), refuses protected files, appends nothing to your message, pushes to each remote in order, and reports git's own output. `sandbox_mode = "workspace-write"` (git writes); with no per-agent tool allowlist in Codex, "never edits your sources" is instruction-enforced |
 | [`starter/.codex/agents/pipeline-auditor.toml`](starter/.codex/agents/pipeline-auditor.toml) | Sub-agent (pipeline workflow): read-only auditor that reads a pipeline doc + its code together and hunts real bugs and concrete optimizations — its `sandbox_mode = "read-only"` makes "reports, never edits" platform-enforced |
 | [`starter/.codex/hooks/pipeline-guard.sh`](starter/.codex/hooks/pipeline-guard.sh) | PostToolUse hook (pipeline workflow, opt-in): after a code edit nudges `$check-pipeline` (+ an auditor pass); after a pipeline-doc edit nudges `$apply-pipeline`. Nudge-only; self-quiets until a `Pipeline/` doc exists |
 | [`starter/.codex/hooks/pipeline-coverage.sh`](starter/.codex/hooks/pipeline-coverage.sh) | On-demand check (pipeline workflow): flags any main code without a pipeline doc and any orphan doc; quiet ("no pipeline docs yet") until you adopt the workflow |
@@ -3313,7 +3391,7 @@ agent-specific wiring:
 | User-scope skills: `~/.agents/skills/` | Global skills: `~/.claude/skills/` |
 | Hooks declared in `.codex/hooks.json`; each script trusted once via `/hooks` | Hooks declared in `.claude/settings.json` |
 | Dual-remote mirror: a `git-mirror.sh` hook that filters the pushed command itself | A `PostToolUse` matcher on `Bash(git push github*)` |
-| Sub-agent: `.codex/agents/pipeline-auditor.toml`, with a platform-enforced read-only sandbox | `.claude/agents/pipeline-auditor.md` |
+| Sub-agents: `.codex/agents/<name>.toml` (`git-committer`, `pipeline-auditor`); `sandbox_mode` restricts the *filesystem*, but there is no per-agent tool allowlist | `.claude/agents/<name>.md`; a `tools:` line restricts the agent's toolset — so a write-capable agent (the committer) can still be denied an edit tool, which Codex cannot do |
 | Plan mode: `/plan` (plus `codex --sandbox read-only` for hard read-only) | Shift+Tab or `--permission-mode plan` |
 | Context meters: `/status`, `/usage` | `/context`, `/usage` |
 | Fresh-session reality check: `codex exec --sandbox read-only "…"` | Open a new session |
