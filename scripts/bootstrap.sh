@@ -120,10 +120,15 @@ core starter/.codex/hooks.json                .codex/hooks.json
 core starter/.codex/hooks/pre-compact.sh      .codex/hooks/pre-compact.sh
 core starter/.codex/hooks/promise-checker.sh  .codex/hooks/promise-checker.sh
 core starter/.codex/agents/git-committer.toml .codex/agents/git-committer.toml
+core starter/.codex/agents/claim-auditor.toml .codex/agents/claim-auditor.toml
+core starter/.codex/agents/round-planner.toml .codex/agents/round-planner.toml
 chmod +x .codex/hooks/*.sh 2>/dev/null
 say "  -> BUGS.md is the recurring-mistake registry: one symptom -> cause -> guard entry"
 say "     per class of mistake, read before writing any code. It ships with generic"
 say "     starting entries; replace them with your own as the project bites you."
+say "  -> claim-auditor + round-planner are read-only sub-agents (sandbox_mode=read-only,"
+say "     so they cannot write). Spawn claim-auditor with artifacts and the drafted claim"
+say "     but NOT your reasoning; round-planner tells you whether a thread is looping."
 say "  -> \$simple-case-gate before you compute, \$claim-audit after the script passes and"
 say "     BEFORE you write it up. claim-audit's gate_audit.sh reads checks written as"
 say "     gate(\"short neutral label\", <expression>) — wrap your checks that way."

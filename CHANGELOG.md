@@ -46,8 +46,24 @@ choosing what to call the result. Mirrors the Claude twin's v1.16.0.
   and *Research-claim discipline* — so both rules apply when nobody invokes a skill.
 - Two new sections in [`starter/BUGS.md`](starter/BUGS.md): **H** (strategy selection and
   escalation) and **I** (claim generation).
-- Both skills install as **universal core** in `scripts/bootstrap.sh` — the `AGENTS.md` blocks
-  name them, so a conditional install would leave a dangling `$command`.
+- **Two read-only sub-agents**, [`claim-auditor`](starter/.codex/agents/claim-auditor.toml)
+  and [`round-planner`](starter/.codex/agents/round-planner.toml). The first is the
+  fresh-context hostile reader: give it the artifacts and the drafted claim, and deliberately
+  **not** your reasoning or what you hope is true — those are what the audit exists to test
+  around, and a fresh context handed the narrative will reconstruct your conclusion and agree
+  with you. The second answers "is this thread still moving?", classifying a round ADVANCE /
+  USEFUL NEGATIVE / LOOP / UNRESOLVED and naming which loop signal fired. Its mechanical test:
+  compare the tuple (target · simplest case in play · exact residual · the step being
+  established) against the previous round — unchanged means loop, however different the code.
+- Both use `sandbox_mode = "read-only"`, which on this side is the **stronger** of the two
+  available levers: it blocks writes at the filesystem, including a write a shell command
+  would attempt. (The Claude twin restricts the agent's tool list instead, which leaves a
+  hole — an agent holding a shell tool can write through it whatever its prompt says. Codex
+  has no per-agent tool allowlist, so the sandbox is the lever here, and for a read-only agent
+  it is the better one.) Both READMEs now say this in the same place.
+- Both skills and both agents install as **universal core** in `scripts/bootstrap.sh` — the
+  `AGENTS.md` blocks name the skills, so a conditional install would leave a dangling
+  `$command`.
 
 ### Changed
 - **One epistemic-status vocabulary with documented coarsenings.** The
@@ -62,6 +78,9 @@ choosing what to call the result. Mirrors the Claude twin's v1.16.0.
   [`starter/AGENTS.md`](starter/AGENTS.md) to your own. To let `gate_audit.sh` read your
   scripts, wrap checks as `gate("short neutral label", <expression>)` — the change that makes
   labels auditable at all, worth doing even if you never run the script.
+- Optional. Existing projects: copy `starter/.codex/agents/claim-auditor.toml` and
+  `starter/.codex/agents/round-planner.toml` into `.codex/agents/`. Nothing else changes if
+  you don't — an unspawned sub-agent costs nothing.
 
 ## v2026.08 · v1.7.0 — 2026-08-25 (update)
 

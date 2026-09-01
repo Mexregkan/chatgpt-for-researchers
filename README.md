@@ -1751,6 +1751,48 @@ acceptance was real; X was not audited. Two claims, two lines. And never promote
 correction into a stronger claim than the corrector made — "the obstacle is not where you
 said" does not become "the obstacle is gone".
 
+### Hand the audit to a context that does not know the story
+
+Doing the audit yourself works, and it is most of the value. But you are auditing a claim
+you just wrote, in the context that produced it, and the reasoning that generated the
+overclaim is still in the window. For a result that would change what you do next, hand it
+to a reader that has none of that.
+
+The starter ships [`claim-auditor`](starter/.codex/agents/claim-auditor.toml), a sub-agent
+whose whole job is to say what the artifacts support. The instruction that makes it work is
+about what you *withhold*:
+
+> Give it the script, the log, and the drafted claim. Do **not** give it your reasoning,
+> the story of how you got there, or what you hope is true.
+
+Those are precisely what the audit is testing around. A fresh context handed the narrative
+will reconstruct your conclusion from it, agree with you, and tell you nothing.
+
+The second agent, [`round-planner`](starter/.codex/agents/round-planner.toml), answers a
+different question: *is this thread still moving?* Sessions are bad at noticing that they
+have spent three rounds renaming the same residual, because every individual round looks
+productive. Its mechanical test is to compare a tuple — target, simplest case in play, exact
+residual, the step being established — against the previous round. If nothing in it changed
+and no quantifier got stronger, it is a loop, however different the new code looks. It also
+carries the loop signals worth knowing by name: escalating after the simple case failed,
+replacing an exact failure with a looser test that cannot see the residual, reopening a
+parked branch without resolving its blocker, and proposing a calculation where neither
+outcome would change the strategy.
+
+Run them in that order — audit the claim, then decide whether the round advanced anything —
+and spawn several `claim-auditor`s in parallel on different axes when a claim is
+load-bearing, since a single auditor can be captured by the framing of the question.
+
+**One design detail worth copying into your own agents.** Both declare
+`sandbox_mode = "read-only"`, and on this side that is the *stronger* of the two available
+levers — it blocks writes at the filesystem, including a write a shell command would
+attempt. (The Claude twin restricts the agent's tool list instead, which leaves a hole: an
+agent holding a shell tool can write through it whatever its prompt says. Codex has no
+per-agent tool allowlist, so the sandbox is the lever here — and for a read-only agent it is
+the better one.) It costs these two agents nothing: an auditor that cannot launch a job is
+behaving correctly anyway. If yours genuinely needs to run something, it needs
+`workspace-write`, and you should describe it honestly as read-mostly rather than read-only.
+
 ### Wiring it in
 
 - Two skills: [`simple-case-gate`](starter/.agents/skills/simple-case-gate/SKILL.md)
@@ -1760,6 +1802,9 @@ said" does not become "the obstacle is gone".
   and *Research-claim discipline* — so the rules apply when nobody invokes a skill.
 - Two sections in [`starter/BUGS.md`](starter/BUGS.md), **H** (escalation) and **I** (claim
   generation), so a specific instance can be cited later the way any other trap is.
+- Two read-only sub-agents, [`claim-auditor`](starter/.codex/agents/claim-auditor.toml) and
+  [`round-planner`](starter/.codex/agents/round-planner.toml), for the results that warrant a
+  reader who does not know the story.
 
 The bootstrap script installs all of it. Both skills are cheap: `simple-case-gate` is 42
 lines and `claim-audit` is read only when a result is about to be written up.
@@ -3471,6 +3516,8 @@ starter/
 │   │   └── pipeline-coverage.sh     ← (pipeline workflow — optional) on-demand coverage check
 │   └── agents/
 │       ├── git-committer.toml       ← commit-and-push sub-agent: stages only what it was named, never `git add .`
+│       ├── claim-auditor.toml       ← read-only: says what the artifacts actually support; give it no session narrative
+│       ├── round-planner.toml       ← read-only: did this round advance anything, or is it a loop? + the one next task
 │       └── pipeline-auditor.toml    ← (pipeline workflow — optional) read-only bug/optimization auditor sub-agent
 └── .agents/
     └── skills/
@@ -3518,6 +3565,8 @@ in Part I.
 | [`starter/.codex/hooks/promise-checker.sh`](starter/.codex/hooks/promise-checker.sh) | Stop hook: catches "I'll remember / I've saved" without a corresponding file edit |
 | [`starter/.codex/hooks/git-mirror.sh`](starter/.codex/hooks/git-mirror.sh) | (Opt-in) PostToolUse hook: after a push to the primary remote, mirrors to the secondary via `scripts/git-push-both.sh` |
 | [`starter/.codex/agents/git-committer.toml`](starter/.codex/agents/git-committer.toml) | Sub-agent: does every commit and push, so the main session never runs `git commit` itself. Stages only the files it was named (never `git add .`), refuses protected files, appends nothing to your message, pushes to each remote in order, and reports git's own output. `sandbox_mode = "workspace-write"` (git writes); with no per-agent tool allowlist in Codex, "never edits your sources" is instruction-enforced |
+| [`starter/.codex/agents/claim-auditor.toml`](starter/.codex/agents/claim-auditor.toml) | Sub-agent: the first hostile reader of a result. Given the artifacts and the drafted claim — and deliberately *not* the session's reasoning — it returns the weakest statement those artifacts support, the computed-object ledger, the checks that are vacuous, and what is missing. `sandbox_mode = "read-only"`, which blocks writes at the filesystem — the stronger of the two levers, and the one Codex gives you |
+| [`starter/.codex/agents/round-planner.toml`](starter/.codex/agents/round-planner.toml) | Sub-agent: is the thread still moving? Classifies a round ADVANCE / USEFUL NEGATIVE / LOOP / UNRESOLVED, checks whether the previous instruction was actually carried out, names which loop signal fired, and specifies the single next task with its pass criterion, a control that can fail, and a stop rule. Also read-only by sandbox |
 | [`starter/.codex/agents/pipeline-auditor.toml`](starter/.codex/agents/pipeline-auditor.toml) | Sub-agent (pipeline workflow): read-only auditor that reads a pipeline doc + its code together and hunts real bugs and concrete optimizations — its `sandbox_mode = "read-only"` makes "reports, never edits" platform-enforced |
 | [`starter/.codex/hooks/pipeline-guard.sh`](starter/.codex/hooks/pipeline-guard.sh) | PostToolUse hook (pipeline workflow, opt-in): after a code edit nudges `$check-pipeline` (+ an auditor pass); after a pipeline-doc edit nudges `$apply-pipeline`. Nudge-only; self-quiets until a `Pipeline/` doc exists |
 | [`starter/.codex/hooks/pipeline-coverage.sh`](starter/.codex/hooks/pipeline-coverage.sh) | On-demand check (pipeline workflow): flags any main code without a pipeline doc and any orphan doc; quiet ("no pipeline docs yet") until you adopt the workflow |
