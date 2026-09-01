@@ -1,5 +1,5 @@
 {
-  "description": "Research-project lifecycle hooks (chatgpt-for-researchers starter). Two hooks ship ON: pre-compact (stamps AGENTS.md + snapshots the task log before context compaction) and promise-checker (catches 'I've saved that' said without an actual file edit). Three more ship OFF because they need per-project configuration — enable by adding the block documented at the top of each script to a 'PostToolUse' array here: .codex/hooks/git-mirror.sh (dual-remote push mirror), .codex/hooks/pipeline-guard.sh (Pipeline workflow nudge; self-quiets until a Pipeline/ doc exists), .agents/skills/wolfram-headless/hooks/wolfram-license-notice.sh (flags the misleading wolframscript 'license error'). Codex requires every non-managed hook to be reviewed and trusted before it runs: type /hooks, inspect each script, trust it. Re-trust after editing a script.",
+  "description": "Research-project lifecycle hooks (chatgpt-for-researchers starter). Three hooks ship ON: reap-wolfram (kills headless Wolfram runs that finished but never exited; a no-op in projects without the script), pre-compact (stamps AGENTS.md + snapshots the task log before context compaction) and promise-checker (catches 'I've saved that' said without an actual file edit). Three more ship OFF because they need per-project configuration — enable by adding the block documented at the top of each script to a 'PostToolUse' array here: .codex/hooks/git-mirror.sh (dual-remote push mirror), .codex/hooks/pipeline-guard.sh (Pipeline workflow nudge; self-quiets until a Pipeline/ doc exists), .agents/skills/wolfram-headless/hooks/wolfram-license-notice.sh (flags the misleading wolframscript 'license error'). Codex requires every non-managed hook to be reviewed and trusted before it runs: type /hooks, inspect each script, trust it. Re-trust after editing a script.",
   "hooks": {
     "PreCompact": [
       {
@@ -20,6 +20,16 @@
             "type": "command",
             "command": "bash .codex/hooks/promise-checker.sh",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "_comment": "Mathematica projects only. Kills headless wolframscript jobs that FINISHED but never exited (one measured case burned 40.7 CPU-hours after its work was over, and blocked its runner so the runner's gate verdict never printed). Safe to fire every turn: it kills a job ONLY when the log already holds the script's own completion marker, so a run still computing is untouchable however long it has taken. Remember to trust it via /hooks, or it does not run.",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/reap-wolfram.sh",
+            "timeout": 30
           }
         ]
       }

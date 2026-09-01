@@ -144,6 +144,21 @@ not an error) · ✅ has a mechanical guard.
   instead of numeric, unpacked instead of packed) is usually a *correctness* bug wearing a
   performance costume.
 - ⚠ **Diagnostics belong at cheap precision; reserve expensive precision for the answer.**
+- 🔴⚠ **A finished run that never exits.** Symptom: the log is perfect — results written,
+  counters printed, done-line present — and the process then holds a core at 100%
+  indefinitely. One measured instance burned **40.7 CPU-hours after the mathematics was
+  over**, found only because the laptop was hot. Two silent consequences: a runner that
+  blocks on the engine never reaches its own gate block, so **the runner's verdict is never
+  printed** and you read the raw log instead and assume the runner agreed; and the process
+  is reparented to init, so it outlives the terminal, the session and the agent, invisible
+  to any per-session check. **Guard: end every script with an explicit quit/exit after the
+  done-line, and check the runner's gate block actually printed — a done-line in the log is
+  not evidence that the runner returned. As a safety net, run a reaper that kills a job ONLY
+  when its log already contains the script's own completion marker.**
+- ⚠ **Never kill a long job on elapsed time or CPU load.** Legitimate research runs are
+  silent for hours; a staleness rule eventually kills live work, which is worse than a
+  wasted core. **Guard: the script's own completion marker is the only admissible evidence
+  that the work is over.** A job with no marker is untouchable however long it has run.
 
 ## F. LaTeX and documents
 
@@ -165,6 +180,97 @@ not an error) · ✅ has a mechanical guard.
 - ⚠ **The always-loaded status section re-grows.** It is appended to instead of replaced, and
   every line costs tokens in every future session. Before deleting anything from it, verify
   the content survives elsewhere (grep each distinctive constant against `CHANGELOG.md`).
+- 🔴 **Deleting generated files by extension, size or age eventually deletes a result.** In a
+  symbolic project the 2 GB file you must keep and the 2 GB file you must not look identical
+  from the outside — same extension, same size, same directory. **Guard: never let a cleanup
+  rule decide what is precious. Ask git: only files matching
+  `git ls-files --others --ignored --exclude-standard` are candidates, so a tracked file
+  cannot be selected at all.** The corollary is that **`.gitignore` is your delete list** —
+  if a heavy generated file is precious, commit it or un-ignore it, and one file then drives
+  both git and the cleanup.
+- ⚠ **Identical file size is a hint, not evidence of a duplicate.** Report candidates,
+  confirm with `cmp`, and delete by hand. A dedupe pass that acts on size alone is a
+  data-loss bug waiting for its first collision.
+- ⚠ **A cleanup tool that logs its own runs becomes a disk-growth source.** Rotate or
+  truncate its log on every run.
+
+## H. Strategy selection and escalation
+
+<!-- Sections A-G are bugs in a CALCULATION. This one and section I are bugs in the step
+     between calculating and deciding what to do next — and they cost whole weeks, not hours. -->
+
+- 🔴 **A failed simple case is not an invitation to add complexity.** Symptom: a mechanism or
+  a claimed-universal formula fails at the lowest admissible order, weight, depth, rank, or
+  dimension, and the next thing tried is a *harder* case — or a case with extra free
+  parameters that only exist there — in the hope that the missing structure will appear.
+  Cause: treating complexity as evidence instead of confronting a counterexample to an
+  all-cases claim. **Guard: identify the simplest admissible nondegenerate case and make the
+  exact proposal pass there first. If it genuinely fails, preserve the first exact residual
+  and stop escalating: diagnose and repair on that same case, or narrow the claim. A modified
+  proposal is a new proposal and restarts the gate.** See the `simple-case-gate` skill.
+- ⚠ **A simple case excluded *after* it failed is not excluded.** Symptom: "that case is
+  degenerate / too simple / outside what we meant" — said for the first time immediately
+  after the case broke the proposal. **Guard: the exclusion must follow from the stated
+  domain, written down before the test. If you cannot derive it, the failure stands.**
+- ⚠ **Replacing an exact failure with a looser test.** Symptom: an exact identity fails, and
+  the next run checks it numerically, or on a projection, or averaged over a range — and
+  passes. Cause: the looser test cannot see the residual that just appeared. **Guard: a
+  weaker test after a failure is not a retest. Keep the exact residual and explain it.**
+- ⚠ **A task whose success and failure both change nothing.** Symptom: a proposed calculation
+  where you cannot say what a pass would license or what a failure would rule out. Cause: the
+  task was chosen because it is runnable, not because it is decision-relevant. **Guard: before
+  running it, write one sentence for each outcome. If both read the same, pick another task.**
+
+---
+
+## I. Claim generation — naming more than you computed
+
+<!-- The bug here is not in the number. The number is right. The bug is in the NOUN. -->
+
+> **Why this section exists.** The overclaim is not written in the summary — it is minted
+> earlier, in the **label on the check**, and the summary, the commit message, the
+> `CHANGELOG.md` row and the workbook section then all inherit it, because they are written
+> in one pass from one context by one process. Auditing the summary is auditing a copy.
+> **Guard for the whole section: audit the labels after the script passes and BEFORE any
+> prose about it exists.** See the `claim-audit` skill.
+
+- 🔴⚠ **The label asserts more than the body checks.** Symptom: `N/N checks passed`, every
+  label a confident sentence, and the bodies turn out to be identities. **Guard: a label is a
+  NEUTRAL DESCRIPTION of the computation — short, no adjectives, no interpretation.
+  Interpretation goes in the report, where it can be audited as a claim. For every check, ask:
+  what is the weakest statement that makes this body pass? Make that the label.**
+- 🔴⚠ **A sentence explaining why a check is *not* trivial is the strongest evidence that it
+  is.** Symptom: prose inside the label pre-empting an objection — "not merely", "not a
+  tautology", "this is what stops it from being circular", "genuinely different". Cause: that
+  sentence is generated by anticipating criticism, not by reading the body; it runs *ahead* of
+  the check rather than after it. **Guard: on writing such a sentence, stop and open the body.
+  Delete the defence and state what the body does.**
+- 🔴⚠ **A body that would pass for any object of its type.** Symptom: the check compares an
+  expression with itself after a substitution, or asserts something true by construction —
+  `M @ M.T` is symmetric for every `M`; `f(a) - f(a) == 0`; a determinant is nonzero on a
+  matrix assembled to be invertible. **Guard: substitute a random object of the same type. If
+  the check still passes, it tests nothing about yours — mark it vacuous and say so.**
+- 🔴⚠ **The computed object is restricted; the reported object is not.** Symptom: the code
+  builds a leading term, one component, a special case, or a single parameter point, and the
+  headline names the whole thing. Cause: the noun is chosen for what the object is *meant to
+  become*. **Guard: the computed-object ledger — column 1 the symbol literally constructed in
+  the code, column 2 the restriction actually established (leading vs full, this order vs all
+  orders, one component vs both, generic vs special), column 3 the headline. A noun in column 3
+  that is absent from column 1 is banned.**
+- 🔴⚠ **A value assigned by hand, then checked downstream, reads as a derivation.** Symptom:
+  an entry is typed in because you know what it should be, and the next check verifies a
+  consequence of it — which holds because the algebra is consistent with your typing, not
+  because anything produced the value. **Guard: every hand-assignment is ASSUMED. Downstream
+  checks say "consistent with the assumption", never "derived". If a recursion or a solve
+  should have produced it, run the solve.**
+- ⚠ **An acceptance token launders an unaudited claim.** Symptom: one verdict line that
+  correctly grades *someone else's* corrections and then, in the same breath, announces a new
+  result nobody has read. **Guard: the verdict line adjudicates only the previous exchange.
+  A new result gets its own line, its own status tag, and an explicit "what this does not
+  establish".**
+- ⚠ **Promoting an accepted correction into a stronger claim than the corrector made.**
+  Symptom: the corrector says "the obstacle is not where you said"; the report says "the
+  obstacle is gone". **Guard: quote the correction before building on it.**
 
 ## H. Strategy selection and escalation
 

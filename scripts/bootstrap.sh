@@ -122,10 +122,16 @@ core starter/.codex/hooks/promise-checker.sh  .codex/hooks/promise-checker.sh
 core starter/.codex/agents/git-committer.toml .codex/agents/git-committer.toml
 core starter/.codex/agents/claim-auditor.toml .codex/agents/claim-auditor.toml
 core starter/.codex/agents/round-planner.toml .codex/agents/round-planner.toml
+mkdir -p scripts
+core starter/scripts/disk-sweep.sh           scripts/disk-sweep.sh
+chmod +x scripts/disk-sweep.sh 2>/dev/null
 chmod +x .codex/hooks/*.sh 2>/dev/null
 say "  -> BUGS.md is the recurring-mistake registry: one symptom -> cause -> guard entry"
 say "     per class of mistake, read before writing any code. It ships with generic"
 say "     starting entries; replace them with your own as the project bites you."
+say "  -> disk-sweep reclaims disk from regenerable files ONLY: it asks git what is"
+say "     disposable, so a TRACKED file can never be selected. Dry run by default."
+say "     FILL IN its PROJECTS array with your repo paths (nested repos listed separately)."
 say "  -> claim-auditor + round-planner are read-only sub-agents (sandbox_mode=read-only,"
 say "     so they cannot write). Spawn claim-auditor with artifacts and the drafted claim"
 say "     but NOT your reasoning; round-planner tells you whether a thread is looping."
@@ -178,7 +184,19 @@ case $NUMERICS in mathematica|both)
     skill wolfram-headless scripts/greek2esc.py hooks/wolfram-license-notice.sh
     skill wolfbook                                  # MCP playbook (harmless if you don't use the Wolfbook MCP)
     mkdir -p .vscode
-    core starter/.vscode/settings.json .vscode/settings.json ;;  # notebook word wrap
+    core starter/.vscode/settings.json .vscode/settings.json    # notebook word wrap
+    # A finished headless run can hold a core indefinitely. The reaper kills a job ONLY
+    # when its log already has the script's own completion marker — never on elapsed time.
+    mkdir -p scripts .codex/hooks
+    core starter/scripts/wolfram-reap.sh          scripts/wolfram-reap.sh
+    core starter/.codex/hooks/reap-wolfram.sh     .codex/hooks/reap-wolfram.sh
+    chmod +x scripts/wolfram-reap.sh .codex/hooks/reap-wolfram.sh 2>/dev/null
+    say "  -> wolfram-reap kills headless runs that FINISHED but never exited (one measured"
+    say "     case burned 40.7 CPU-hours after its work was over). Its Stop hook is ALREADY"
+    say "     registered in .codex/hooks.json — but Codex will not run it until you TRUST it:"
+    say "     type /hooks, inspect reap-wolfram.sh, trust it (re-trust after any edit)."
+    say "     It never kills on elapsed time, only on the script's own completion marker."
+    say "     End your .wls scripts with Quit[] after the done-line — that is the real fix." ;;
 esac
 [ "$OVERLEAF" -eq 1 ] && skill overleaf-sync
 
