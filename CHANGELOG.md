@@ -12,6 +12,57 @@ version (`MAJOR.MINOR.PATCH`): **PATCH** for a fix or clarification, **MINOR** f
 skill/tool/guide section, **MAJOR** only if an update would break an existing setup (force
 a re-copy to keep working).
 
+## v2026.09 · v1.8.0 — 2026-09-01
+
+Two disciplines that sit either side of a calculation: choosing which case to test, and
+choosing what to call the result. Mirrors the Claude twin's v1.16.0.
+
+### Added
+- **New guide section, [Claim discipline: name only what you computed](README.md#claim-discipline-name-only-what-you-computed)**
+  (Part II, section 9 — the Table of Contents renumbers 9–24 to 10–25). The two failure
+  modes: escalating to a harder case after a proposal fails at the simplest one, and naming
+  more than you computed.
+- **[`simple-case-gate`](starter/.agents/skills/simple-case-gate/SKILL.md) skill** — identify
+  the simplest admissible nondegenerate case and make the *exact* proposal pass there before
+  increasing order, weight, rank, dimension, or free parameters. When it fails, preserve the
+  first exact residual and **stop escalating**. A modified proposal restarts the gate, and a
+  simple case may be skipped only if the exclusion follows from the domain you stated *before*
+  the test.
+- **[`claim-audit`](starter/.agents/skills/claim-audit/SKILL.md) skill** — the hostile read of
+  your own result, after the script passes and **before** any prose exists. The idea it rests
+  on: an overclaim is not written in the summary, it is minted in the **label on a check**, and
+  the summary, commit message, changelog row and workbook section then inherit it because they
+  are written in one pass from one context. Ships the *computed-object ledger* (symbol
+  literally constructed in the code → restriction actually established → headline, banning a
+  headline noun absent from the code), the weakest-statement rewrite of every label, and the
+  tell that costs nothing: if you are writing a sentence explaining why a check is not trivial,
+  the check is trivial.
+- **`gate_audit.sh`**, the mechanical pre-filter: hand-assigned values, over-budget labels,
+  advocacy language, and bodies whose shape is true for every input. It reads both
+  `gate("label", body)` and `gate[...]`, so Python, Julia and Wolfram all work — and it
+  **exits non-zero and says so loudly when it parses no labelled checks**, rather than
+  printing an all-clear on a file it could not read.
+- Two non-negotiable blocks in [`starter/AGENTS.md`](starter/AGENTS.md) — *Simple-case gate*
+  and *Research-claim discipline* — so both rules apply when nobody invokes a skill.
+- Two new sections in [`starter/BUGS.md`](starter/BUGS.md): **H** (strategy selection and
+  escalation) and **I** (claim generation).
+- Both skills install as **universal core** in `scripts/bootstrap.sh` — the `AGENTS.md` blocks
+  name them, so a conditional install would leave a dangling `$command`.
+
+### Changed
+- **One epistemic-status vocabulary with documented coarsenings.** The
+  [trust ledger](README.md#make-epistemic-status-explicit-a-trust-ledger)'s four levels stay as
+  the minimum workable set and now point at the finer eight-status list, which splits the two
+  distinctions the four blur: exact-but-bounded (`finite verification`) against approximate
+  (`numerical evidence`), and a proved negative (`obstruction`) against simply `open`.
+
+### Action needed
+- Optional. Existing projects: copy `starter/.agents/skills/simple-case-gate/` and
+  `starter/.agents/skills/claim-audit/` into `.agents/skills/`, and add the two blocks from
+  [`starter/AGENTS.md`](starter/AGENTS.md) to your own. To let `gate_audit.sh` read your
+  scripts, wrap checks as `gate("short neutral label", <expression>)` — the change that makes
+  labels auditable at all, worth doing even if you never run the script.
+
 ## v2026.08 · v1.7.0 — 2026-08-25 (update)
 
 ### Added
