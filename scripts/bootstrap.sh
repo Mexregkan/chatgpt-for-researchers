@@ -122,6 +122,10 @@ core starter/.codex/hooks/promise-checker.sh  .codex/hooks/promise-checker.sh
 core starter/.codex/agents/git-committer.toml .codex/agents/git-committer.toml
 core starter/.codex/agents/claim-auditor.toml .codex/agents/claim-auditor.toml
 core starter/.codex/agents/round-planner.toml .codex/agents/round-planner.toml
+core starter/.codex/agents/doc-sweeper.toml  .codex/agents/doc-sweeper.toml
+core starter/.codex/agents/doc-auditor.toml  .codex/agents/doc-auditor.toml
+mkdir -p audits
+core starter/audits/README.md                audits/README.md
 mkdir -p scripts
 core starter/scripts/disk-sweep.sh           scripts/disk-sweep.sh
 chmod +x scripts/disk-sweep.sh 2>/dev/null
@@ -135,9 +139,15 @@ say "     FILL IN its PROJECTS array with your repo paths (nested repos listed s
 say "  -> claim-auditor + round-planner are read-only sub-agents (sandbox_mode=read-only,"
 say "     so they cannot write). Spawn claim-auditor with artifacts and the drafted claim"
 say "     but NOT your reasoning; round-planner tells you whether a thread is looping."
+say "  -> doc-sweeper + doc-auditor serve \$doc-audit; reports land in audits/. Hand"
+say "     doc-auditor the bare claim and the evidence paths, NEVER your own verdict."
 say "  -> \$simple-case-gate before you compute, \$claim-audit after the script passes and"
 say "     BEFORE you write it up. claim-audit's gate_audit.sh reads checks written as"
 say "     gate(\"short neutral label\", <expression>) — wrap your checks that way."
+say "  -> \$doc-audit <file> evaluates ONE finished document (workbook section, brief,"
+say "     bigPicture, strategy map, handoff, paper) and writes a report to audits/;"
+say "     it never edits the document. FILL IN doc_lint.sh's SEARCH_DIRS with the"
+say "     folders your documents cite scripts and data from."
 say "  -> git-committer is the commit-and-push sub-agent (every commit goes through it,"
 say "     so nothing ever gets \`git add .\`-ed by accident). FILL IN its two project"
 say "     blocks: your repos + remotes + push order, and your protected files."
@@ -176,6 +186,7 @@ skill sync-brief
 # Both are inert until invoked, and every project makes claims — even one with no code.
 skill simple-case-gate
 skill claim-audit gate_audit.sh selftest.sh
+skill doc-audit doc_lint.sh selftest.sh rubrics.md report-template.md
 [ "$CITE" -eq 1 ]     && skill verify-citation
 if [ "$VALID" -eq 1 ]; then skill reality-check; skill cross-validate; fi
 case $NUMERICS in mathematica|both)

@@ -21,7 +21,7 @@ workflow so that *you* can do the research faster and more cleanly: less time on
 housekeeping, better continuity across sessions, fewer mistakes from working in a big
 messy codebase. Codex is the tool; you are the researcher.
 
-**Version 2026.09 · v1.9.3** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
+**Version 2026.09 · v1.10.0** — see [CHANGELOG.md](CHANGELOG.md) for updates. If you set up
 a project from an earlier copy, the changelog tells you what is worth re-copying from
 `starter/`. (The calendar tag says how current your copy is; the SemVer says how much has
 changed and whether anything breaks — see the changelog intro.)
@@ -69,31 +69,32 @@ This guide serves two audiences at once, so it is organised in parts:
 7. [Session continuity: next-session-prompts.md](#session-continuity-next-session-promptsmd)
 8. [BUGS.md: the recurring-mistake registry](#bugsmd-the-recurring-mistake-registry)
 9. [Claim discipline: name only what you computed](#claim-discipline-name-only-what-you-computed)
-10. [Session length and context limits](#session-length-and-context-limits)
-11. [Plan mode: investigate before you edit](#plan-mode-investigate-before-you-edit)
-12. [Skills: reusable procedures](#skills-reusable-procedures)
-13. [Git workflow for academics](#git-workflow-for-academics)
-14. [Numerics and computation](#numerics-and-computation)
+10. [Auditing a document before you rely on it](#auditing-a-document-before-you-rely-on-it)
+11. [Session length and context limits](#session-length-and-context-limits)
+12. [Plan mode: investigate before you edit](#plan-mode-investigate-before-you-edit)
+13. [Skills: reusable procedures](#skills-reusable-procedures)
+14. [Git workflow for academics](#git-workflow-for-academics)
+15. [Numerics and computation](#numerics-and-computation)
 
 **[Part III: Power tools](#part-iii-power-tools)** — *optional; adopt once the basics feel comfortable*
 
-15. [Config and hooks](#config-and-hooks)
-16. [Group projects: shared vs personal configuration](#group-projects-shared-vs-personal-configuration)
-17. [Sub-agents: isolated context for big jobs](#sub-agents-isolated-context-for-big-jobs)
-18. [Reducing token consumption](#reducing-token-consumption)
-19. [The pipeline workflow: keep Codex fluent in your own code](#the-pipeline-workflow-keep-codex-fluent-in-your-own-code)
-20. [distill: filtering noisy research-command output](#distill-filtering-noisy-research-command-output)
-21. [GitHub README and LaTeX](#github-readme-and-latex)
+16. [Config and hooks](#config-and-hooks)
+17. [Group projects: shared vs personal configuration](#group-projects-shared-vs-personal-configuration)
+18. [Sub-agents: isolated context for big jobs](#sub-agents-isolated-context-for-big-jobs)
+19. [Reducing token consumption](#reducing-token-consumption)
+20. [The pipeline workflow: keep Codex fluent in your own code](#the-pipeline-workflow-keep-codex-fluent-in-your-own-code)
+21. [distill: filtering noisy research-command output](#distill-filtering-noisy-research-command-output)
+22. [GitHub README and LaTeX](#github-readme-and-latex)
 
 **[Part IV: What the model gets wrong](#part-iv-what-the-model-gets-wrong)** — *required reading*
 
-22. [Honest limitations](#honest-limitations)
+23. [Honest limitations](#honest-limitations)
 
 **[Appendix](#appendix)**
 
-23. [Templates and scripts in this repo](#templates-and-scripts-in-this-repo)
-24. [The Claude twin: claude-for-researchers](#the-claude-twin-claude-for-researchers)
-25. [Using both: Claude and Codex on one project](#using-both-claude-and-codex-on-one-project)
+24. [Templates and scripts in this repo](#templates-and-scripts-in-this-repo)
+25. [The Claude twin: claude-for-researchers](#the-claude-twin-claude-for-researchers)
+26. [Using both: Claude and Codex on one project](#using-both-claude-and-codex-on-one-project)
 
 ---
 
@@ -299,6 +300,23 @@ soften it.
 > such as an `Overleaf/` clone that must never be pushed) and my protected files. Ask
 > me for anything you do not know; do not guess a remote. From now on, use this agent
 > for every commit and push instead of running `git commit` yourself.
+>
+> **Copy this kit verbatim:** the claim-discipline kit —
+> `.agents/skills/simple-case-gate/SKILL.md`, `.agents/skills/claim-audit/` (SKILL.md +
+> `gate_audit.sh` + `selftest.sh`), `.codex/agents/claim-auditor.toml` and
+> `.codex/agents/round-planner.toml`. It is not optional: the *Simple-case gate* and
+> *Research-claim discipline* blocks of the `AGENTS.md` you generate below name
+> `$simple-case-gate` and `$claim-audit` by name, so skipping them leaves a dangling
+> command. Run `bash .agents/skills/claim-audit/selftest.sh` once and tell me the pass count.
+>
+> **Copy this kit verbatim, then fill in one line:** the document-audit kit —
+> `.agents/skills/doc-audit/` (all five files), `.codex/agents/doc-sweeper.toml`,
+> `.codex/agents/doc-auditor.toml`, and `audits/README.md`. It evaluates one finished
+> document without editing it, so it is useful in any project that keeps records. The
+> one thing to fill in: the `SEARCH_DIRS` line near the top of `doc_lint.sh` must list
+> the folders my documents cite scripts, logs and data from, or every pointer will be
+> reported as unresolved. Run `bash .agents/skills/doc-audit/selftest.sh` once
+> afterwards and tell me the pass count.
 >
 > **Install skills by relevance — NOT all of them.** The four generated files
 > below are universal; skills are not. From my project description, decide which
@@ -1821,6 +1839,206 @@ behaving correctly anyway. If yours genuinely needs to run something, it needs
 
 The bootstrap script installs all of it. Both skills are cheap: `simple-case-gate` is 42
 lines and `claim-audit` is read only when a result is about to be written up.
+
+---
+
+## Auditing a document before you rely on it
+
+The previous section guards one moment: a computation becoming prose. Nothing yet guards
+what happens next — the prose becoming *the record*, and the record becoming the input to
+every later session, every message to a collaborator, and eventually a paper.
+
+That gap has a specific shape, and it is worth stating plainly. **A record is written in
+the same pass, from the same context, as the claim it records.** Your workbook section, the
+status line in your strategy map and the changelog row are not three independent witnesses;
+they are three copies of one sentence you wrote once, while you were pleased with a result.
+Nobody reads any of them adversarially before they are relied on. So the first hostile
+reader of your record is whoever you send it to — and of course they find something.
+
+A document audit is doing that read yourself, first.
+
+### What it is, and what it deliberately is not
+
+`$doc-audit <path>` takes **one document** and produces an evaluation of it: every headline
+claim extracted, typed, traced to the evidence it cites, checked against the sibling
+records, and written up as a report in `audits/`. It is a
+[skill](starter/.agents/skills/doc-audit/SKILL.md) plus a
+[mechanical lint](starter/.agents/skills/doc-audit/doc_lint.sh) plus two read-only
+sub-agents.
+
+Three things it is not, each of them a deliberate subtraction:
+
+- **Not a referee report.** No recommendation, no novelty judgment, no author to address.
+  Everything editorial is removed; what is left is "is this supported".
+- **Not an edit.** The audit never changes the document. Findings carry *proposed
+  replacement text* in quotes, and you decide what to apply, in a later turn. An agent that
+  can fix what it finds has an obvious incentive to find fixable things — and, worse, an
+  audit that edits as it goes leaves you unable to tell what it changed from what it
+  checked.
+- **Not truth.** The report is itself a document written in one pass, so it overclaims like
+  everything else. More on that below, because it is the most useful thing in this section.
+
+### The five moves
+
+**1. Run the mechanical pre-filter first.** [`doc_lint.sh`](starter/.agents/skills/doc-audit/doc_lint.sh)
+reads a `.tex` or `.md` file and reports: dangling `\ref`/`\cite` keys and dead relative
+links; strength words ("proved", "for every n", "canonical") in paragraphs that carry none of
+the eight claim statuses; hand-wave phrases; count leads; **file pointers that no longer
+resolve**; unfinished markers; append-style retractions; relative dates; and a structural
+check per document type.
+
+The one to read literally is the pointer section. After you reorganise folders, nothing
+errors — the prose still reads fine, and every path in it now points at nothing. That
+section is the cheap way to see which evidence a document can no longer reach, and it tells
+"moved" (the basename exists elsewhere) apart from "gone" (not in the repository at all).
+
+Everything else in the lint is a *lead*, not a finding: read the flagged line before you
+write anything down. And the same rule as `gate_audit.sh` applies — a clean run means "no
+cheap tell fired", never "the document is sound", and an empty or unparseable file exits
+non-zero with a loud banner rather than reporting zero problems.
+
+**2. Sweep before you judge.** The next step reads the whole document and extracts one row
+per checkable claim — location, the claim phrased *so that it could be false*, the type as
+written, whether it is load-bearing, and **the check that would settle it** — with no
+verdicts at all. On a long document this fans out to several
+[`doc-sweeper`](starter/.codex/agents/doc-sweeper.toml) agents in parallel, one per section.
+
+Separating these two passes is the load-bearing design choice. If you read and judge at the
+same time, you get confident verdicts on the claims that were easy to check and silence on
+the ones that mattered — and the silence looks exactly like agreement. Proposing the check
+is half the value of the sweep; a claim nobody can name a check for is itself a finding.
+
+**3. Verify each load-bearing row, and say how.** Every row gets an evidence class, and
+naming it is what stops "I read it and it seemed fine" from passing as verification:
+
+| class | what it means |
+|---|---|
+| **TRACE** | the cited script/log/output exists, and the *check whose body tests this claim* is identified — label matched against body, vacuous checks named |
+| **DERIVE** | re-derive a cheap step with the document's answer covered, then compare |
+| **DRIFT** | the same statement in the strategy map, changelog, brief, big picture, newest handoff — same strength, same conditions, same numbers? |
+| **TYPE** | the type as written vs. the type the evidence supports, with **the weakest supported statement written out in full** |
+| **CITE** | the reference exists, and is cited for what it actually says |
+| **CONVENTION** | checked against your pinned conventions, including where a quantity was translated from someone else's |
+
+Verdicts come from a fixed vocabulary — `SUPPORTED`, `OVERCLAIMED`, `UNSUPPORTED`,
+`CONTRADICTED`, `STALE`, `UNVERIFIABLE`, `QUESTION` — and each carries what the check does
+*not* cover. `SUPPORTED` needs the same evidence as `OVERCLAIMED`: agreement is a result,
+and "looks right" is not evidence for it.
+
+**4. Get a second witness who does not know the story.** The top load-bearing claims go to
+[`doc-auditor`](starter/.codex/agents/doc-auditor.toml), which is handed **only** the bare
+claim, its location, the definitions it needs and the evidence paths — never your verdict,
+your ledger or the session narrative, since those are exactly what the fresh read is testing
+around. Disagreement is the payoff, not a problem: report both readings and the single check
+that would decide between them, and never average.
+
+Two rules here came from getting it wrong in a real run:
+
+- **Quote the document, never a sibling record.** Hand the reader the strategy map's
+  paraphrase of a claim and it audits a sentence the document does not contain. Its verdict
+  is then worthless in a way that is very hard to notice.
+- **If a fresh read is lost** — a rate limit, an interrupted run — rerun it. Silently
+  falling back to a single witness turns a two-witness verdict into a one-witness verdict
+  with a two-witness label.
+
+**5. Walk the rubric for that document type.** A workbook section, a big picture, a strategy
+map, a handoff message and a paper fail in different ways, so
+[`rubrics.md`](starter/.agents/skills/doc-audit/rubrics.md) carries a checklist per type:
+pedagogy and in-place correction for workbooks; ledger-versus-strategy-map for big pictures;
+currency and stop rules for strategy maps; the verdict/new-claim split for handoffs;
+abstract-versus-body for papers. Each item is PASS / FAIL with a location, or N-A.
+
+### Sibling records are co-claims, not ground truth
+
+This is the idea most worth taking even if you never install the skill. When you check a
+workbook statement against the strategy map and they agree, you have learned almost nothing
+— both were written in the same session by the same process. When they *disagree*, you have
+learned something real, and **the disagreement is the finding**. Do not resolve it by
+picking the more recent file or the more authoritative-sounding one. Quote both sides, and
+decide only if evidence decides.
+
+The corollary is that "the strategy map says so" is never a reason a statement is true. Nor
+is "12/12 checks passed" — a count is a control, and it belongs in a status line, not in the
+place where the reason should be.
+
+### The honest half of the report
+
+Two sections do the most work and are the easiest to skip.
+
+**"What was not checked."** Every row left unverified and why; scripts not re-run; citations
+not checked; sections not swept. An audit with a short "not checked" list is usually an
+audit that did not look. In a real workbook audit this list ran to seven bullets,
+including "the remaining ~250 checks were not read" — which is the fact a reader most needs
+in order to know what the report does *not* license.
+
+**"Audit-tooling notes."** What the tools got wrong during this run. The first real run
+produced four: a lint regex that read the LaTeX fraction `T^2/2` as a count lead; sweepers
+reporting labels as missing because they were only given one file of a multi-file document;
+a lost fresh-context read that nearly became a silent downgrade; and a claim handed to a
+reader in the strategy map's wording rather than the document's. All four are fixed in the
+version shipped here, and the first has a regression case in
+[`selftest.sh`](starter/.agents/skills/doc-audit/selftest.sh). The point of the section is
+that a checking tool improves only if each run is allowed to indict it.
+
+### Audit the audit
+
+The first real use of this workflow produced fifteen findings on one workbook. The user then
+had a second agent evaluate the audit itself, with the same standard of evidence. Twelve
+findings were accepted as written. **Three had their strongest wording rejected**: a count
+was off by one (eight uncited scripts, not nine); "the proof survives only in an old commit"
+was wrong, because the proof scripts were still on disk and the strategy map still held an
+outline; and a terminology correction was right but had dropped the exceptional cases.
+
+All three were accepted *in substance*. That is the expected shape, and it is worth knowing
+before you run this on your own work, for two reasons. It is why the report proposes
+replacement text instead of applying it — a 20%-overclaimed report that edits your workbook
+is worse than no report. And it is a fair estimate of what an adversarial pass costs and
+buys: roughly a fifth of the findings will be too strongly worded, and the other four fifths
+will be things you would otherwise have shipped.
+
+### When to run it
+
+Not routinely — this is expensive, and on a long document it spawns a lot of agents. Run it
+at the moments where a record stops being yours:
+
+- before a document is relied on by a later session as settled background;
+- before you send a section to a collaborator, or hand it to a second agent;
+- before a workbook result becomes a paper claim;
+- after a folder reorganisation (for the pointer check alone, `--depth quick` is enough);
+- when a document and a sibling record seem to disagree and you want it settled.
+
+If you do nothing else, three checks take five minutes on any document and catch most of
+what the full audit catches:
+
+1. **Does every pointer resolve?** Run the lint; read section `[5]`.
+2. **Is every headline typed?** Any sentence with "proved", "for all", "canonical" that
+   carries none of the eight statuses in the same paragraph is a claim nobody has priced.
+3. **Does the strongest sentence appear identically in the sibling records?** Grep its most
+   distinctive constant or phrase across the strategy map, changelog and brief, and compare
+   the condition lists word for word.
+
+### Wiring it in
+
+- The skill [`doc-audit`](starter/.agents/skills/doc-audit/SKILL.md) with its
+  [lint](starter/.agents/skills/doc-audit/doc_lint.sh),
+  [rubrics](starter/.agents/skills/doc-audit/rubrics.md),
+  [report template](starter/.agents/skills/doc-audit/report-template.md) and
+  [self-test](starter/.agents/skills/doc-audit/selftest.sh).
+- Two read-only sub-agents, [`doc-sweeper`](starter/.codex/agents/doc-sweeper.toml) and
+  [`doc-auditor`](starter/.codex/agents/doc-auditor.toml), both declared
+  `sandbox_mode = "read-only"`. Codex has no per-agent tool allowlist, so the sandbox is the
+  lever — and here it is the *stronger* of the two ecosystems' answers: the Claude twin's
+  `doc-auditor` keeps a shell so it can count lines in logs, and a shell can write no matter
+  what its prompt says. On this side the shell is available and the filesystem is still
+  read-only.
+- An [`audits/`](starter/audits/README.md) folder, with a README stating what a report is
+  and is not.
+- A paragraph in [`starter/AGENTS.md`](starter/AGENTS.md)'s *Research-claim discipline*
+  block, so the rule survives without anyone invoking a skill.
+
+One thing to fill in after installing: `doc_lint.sh` has a `SEARCH_DIRS` line near the top
+listing the folders your documents cite scripts, logs and data from. If it does not know
+where your evidence lives, it will report every pointer as unresolved.
 
 ---
 
@@ -3657,6 +3875,8 @@ starter/
 │   ├── git-push-both.sh             ← (opt-in) dual-remote push; paired with the git-mirror hook
 │   ├── wolfram-reap.sh              ← (Mathematica) kills batch runs that finished but never exited; marker-based, never time-based
 │   └── disk-sweep.sh                ← reclaims disk from regenerable files ONLY — asks git what is disposable; dry run by default
+├── audits/                          ← document-evaluation reports from $doc-audit; evaluations, never canonical truth
+│   └── README.md                   ← what a report is and is not; the naming convention
 ├── Pipeline/                        ← (pipeline workflow — optional) one map per big code; read README.md first
 │   └── README.md                   ← index of the codes and their pipeline docs
 ├── handoff/                         ← (two agents — optional) the agent mailbox; skip if only one agent works the repo
@@ -3679,6 +3899,8 @@ starter/
 │       ├── git-committer.toml       ← commit-and-push sub-agent: stages only what it was named, never `git add .`
 │       ├── claim-auditor.toml       ← read-only: says what the artifacts actually support; give it no session narrative
 │       ├── round-planner.toml       ← read-only: did this round advance anything, or is it a loop? + the one next task
+│       ├── doc-sweeper.toml         ← read-only: extracts one ledger row per checkable claim of a document; NO verdicts
+│       ├── doc-auditor.toml         ← read-only: fresh-context adversary for ONE claim; give it the claim and the evidence, never your verdict
 │       └── pipeline-auditor.toml    ← (pipeline workflow — optional) read-only bug/optimization auditor sub-agent
 └── .agents/
     └── skills/
@@ -3693,6 +3915,7 @@ starter/
         ├── cross-validate/SKILL.md  ← $cross-validate skill
         ├── simple-case-gate/SKILL.md ← $simple-case-gate skill: gate a proposal on the simplest case before escalating
         ├── claim-audit/             ← $claim-audit skill (SKILL.md + gate_audit.sh + selftest.sh): audit a passing script before writing prose
+        ├── doc-audit/               ← $doc-audit skill (SKILL.md + doc_lint.sh, rubrics.md, report-template.md, selftest.sh): evaluate ONE finished document without editing it
         ├── overleaf-sync/SKILL.md   ← $overleaf-sync skill
         ├── write-pipeline/          ← (pipeline workflow — optional) $write-pipeline skill (SKILL.md + dump_code.py)
         ├── check-pipeline/SKILL.md  ← (pipeline workflow — optional) $check-pipeline skill
@@ -3730,6 +3953,10 @@ in Part I.
 | [`starter/.codex/hooks/git-mirror.sh`](starter/.codex/hooks/git-mirror.sh) | (Opt-in) PostToolUse hook: after a push to the primary remote, mirrors to the secondary via `scripts/git-push-both.sh` |
 | [`starter/.codex/agents/git-committer.toml`](starter/.codex/agents/git-committer.toml) | Sub-agent: does every commit and push, so the main session never runs `git commit` itself. Stages only the files it was named (never `git add .`), refuses protected files, appends nothing to your message, pushes to each remote in order, and reports git's own output. `sandbox_mode = "workspace-write"` (git writes); with no per-agent tool allowlist in Codex, "never edits your sources" is instruction-enforced |
 | [`starter/.codex/agents/claim-auditor.toml`](starter/.codex/agents/claim-auditor.toml) | Sub-agent: the first hostile reader of a result. Given the artifacts and the drafted claim — and deliberately *not* the session's reasoning — it returns the weakest statement those artifacts support, the computed-object ledger, the checks that are vacuous, and what is missing. `sandbox_mode = "read-only"`, which blocks writes at the filesystem — the stronger of the two levers, and the one Codex gives you |
+| [`starter/.agents/skills/doc-audit/`](starter/.agents/skills/doc-audit/) | `$doc-audit` skill (SKILL.md + `doc_lint.sh`, `rubrics.md`, `report-template.md`, `selftest.sh`): the hostile, evidence-bound read of **one finished document** — workbook section, `bigPicture.tex`, `strategy-map.md`, `brief.tex`, a handoff message, a paper draft. Sweep into a claim ledger before any verdict, an evidence class per row (TRACE / DERIVE / DRIFT / TYPE / CITE / CONVENTION), the weakest supported statement for every mistyped headline, drift against the sibling records treated as a *finding* rather than resolved, a second witness that never sees your verdict, and a report in `audits/` that proposes replacement text and never edits the document. `doc_lint.sh` is the mechanical pre-filter — dangling refs and dead links, untyped strength words, hand-waving, count leads, **pointers that no longer resolve**, unfinished markers, append-style retractions, relative dates, per-type structure — exiting non-zero rather than reporting a clean run on a file it could not parse. `selftest.sh` is its regression suite (39 cases, each asserting a detector fires or, for the negative cases, does not) |
+| [`starter/audits/README.md`](starter/audits/README.md) | The `audits/` folder convention: one dated report per `$doc-audit` run, what an audit report is (an evaluation) and is not (canonical truth, a referee report, an edit), and the rule that nothing downstream may cite an audit as evidence — cite what it *checked* |
+| [`starter/.codex/agents/doc-sweeper.toml`](starter/.codex/agents/doc-sweeper.toml) | Sub-agent: the reading half of a document audit. Extracts one ledger row per checkable claim of one section — location, the claim phrased so it could be false, type as written, load class, and **the check that would settle it** — and deliberately returns no verdicts, because reading and judging in one pass yields confident verdicts on the easy claims and silence on the load-bearing ones. `sandbox_mode = "read-only"` |
+| [`starter/.codex/agents/doc-auditor.toml`](starter/.codex/agents/doc-auditor.toml) | Sub-agent: the fresh-context adversary for a single claim of a document. Handed the bare claim, its location and the evidence paths — never the caller's verdict or narrative — it returns the weakest statement the evidence supports, ranked breaks, unstated assumptions and drift against the sibling records. Read-only by sandbox, which here is stronger than the Claude twin: that one keeps a shell to count lines in logs, and a shell can write |
 | [`starter/.codex/agents/round-planner.toml`](starter/.codex/agents/round-planner.toml) | Sub-agent: is the thread still moving? Classifies a round ADVANCE / USEFUL NEGATIVE / LOOP / UNRESOLVED, checks whether the previous instruction was actually carried out, names which loop signal fired, and specifies the single next task with its pass criterion, a control that can fail, and a stop rule. Also read-only by sandbox |
 | [`starter/.codex/agents/pipeline-auditor.toml`](starter/.codex/agents/pipeline-auditor.toml) | Sub-agent (pipeline workflow): read-only auditor that reads a pipeline doc + its code together and hunts real bugs and concrete optimizations — its `sandbox_mode = "read-only"` makes "reports, never edits" platform-enforced |
 | [`starter/.codex/hooks/pipeline-guard.sh`](starter/.codex/hooks/pipeline-guard.sh) | PostToolUse hook (pipeline workflow, opt-in): after a code edit nudges `$check-pipeline` (+ an auditor pass); after a pipeline-doc edit nudges `$apply-pipeline`. Nudge-only; self-quiets until a `Pipeline/` doc exists |
